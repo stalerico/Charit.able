@@ -1,4 +1,4 @@
-import TypingAnimatedText from "./components/TypingAnimatedText.tsx";
+import TypingAnimatedText from "../components/TypingAnimatedText.tsx";
 export default function Home() {
   return (
     <div>
