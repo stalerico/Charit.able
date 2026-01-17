@@ -3,7 +3,7 @@
     "target": "ESNext",
     "module": "ESNext",
     "lib": ["DOM", "DOM.Iterable", "ESNext"],
-    "jsx": "react-jsx",           // <-- THIS IS CRUCIAL
+    "jsx": "react-jsx",
     "moduleResolution": "Node",
     "esModuleInterop": true,
     "skipLibCheck": true,
