@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import TypingAnimatedText from "../components/TypingAnimatedText.tsx";
 import Navbar from "../components/navbar.tsx";
 import Donate from "../components/ui/donor_card";
+import RecentSales from "../components/RecentSales.tsx";
 
 export default function Home() {
   const navigate = useNavigate();
@@ -17,14 +18,15 @@ export default function Home() {
           This is the main landing page of the application.
         </p>
 
-        <div className="mt-6 flex gap-4">
+        <div>
           <button onClick={() => navigate("/test")}>Click me woof woof</button>
-
-          <button onClick={() => navigate("/wallet_testing")}>
-            jesus is cooking
-          </button>
-          <Donate />
+          <button onClick={() => navigate("/wallet_testing")}>jesus is cooking</button>
         </div>
+          <Donate />
+          <div className="items-center mt-8 w-1/2">
+            <RecentSales />
+          </div>
+          
       </main>
     </>
   );
