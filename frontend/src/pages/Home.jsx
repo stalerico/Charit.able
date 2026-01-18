@@ -1,4 +1,8 @@
-import TypingAnimatedText from "../components/TypingAnimatedText.tsx";
+import TypingAnimatedText from "../components/TypingAnimatedText";
+import { useNavigate } from "react-router-dom";
+import { useState } from 'react'
+import CursorEffect from "../components/CursorEffect.tsx";
+
 export default function Home() {
   const navigate = useNavigate();
   return (
