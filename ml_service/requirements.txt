@@ -1,13 +1,16 @@
 # ML Category Verification Service Dependencies
 
-# Web Framework (Python 3.13 compatible versions)
-fastapi==0.115.5
-uvicorn[standard]==0.32.1
-pydantic==2.10.3
+# Web Framework
+fastapi>=0.115.0
+uvicorn[standard]>=0.32.0
+pydantic>=2.10.0
 
 # OCR
-pytesseract==0.3.13
-Pillow==11.0.0
+pytesseract>=0.3.13
+Pillow>=11.0.0
 
-# HTTP Requests (also used for OpenRouter API)
-requests==2.32.3
+# HTTP Requests
+requests>=2.32.0
+
+# Environment variables
+python-dotenv>=1.0.0
