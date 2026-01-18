@@ -1,5 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import TypingAnimatedText from "../components/TypingAnimatedText.tsx";
+import Navbar from "../components/navbar.tsx";
+import Donate from "../components/ui/donor_card";
 
 export default function Home() {
   const navigate = useNavigate();
@@ -16,13 +18,12 @@ export default function Home() {
         </p>
 
         <div className="mt-6 flex gap-4">
-          <button onClick={() => navigate("/test")}>
-            Click me woof woof
-          </button>
+          <button onClick={() => navigate("/test")}>Click me woof woof</button>
 
           <button onClick={() => navigate("/wallet_testing")}>
             jesus is cooking
           </button>
+          <Donate />
         </div>
       </main>
     </>

@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 function NavItem({ text, onClick }) {
   return (
     <button
       type="button"
-      className="px-4 py-2 text-sm font-medium text-neutral-200 hover:text-white hover:bg-white/10 rounded-lg transition"
+      className="px-4 py-2 text-md font-medium text-neutral-200 hover:text-white hover:bg-white/10 rounded-lg transition"
       onClick={onClick}
     >
       {text}
@@ -13,50 +14,33 @@ function NavItem({ text, onClick }) {
 }
 
 function Navbar() {
+  const navigate = useNavigate();
   const [navItems, setNavItems] = useState([
-    { text: "Experience", onClick: () => alert("Navigate to Experience") },
-    { text: "Testimonials", onClick: () => alert("Navigate to Testimonials") },
+    { text: "Beneficiaries", onClick: () => navigate("/test") },
+    { text: "Testimonials", onClick: () => navigate("/") },
     { text: "Pricing", onClick: () => alert("Navigate to Pricing") },
     { text: "FAQ", onClick: () => alert("Navigate to FAQ") },
   ]);
 
-  useEffect(() => {
-    async function fetchNavItems() {
-      try {
-        const response = await fetch("/api/navItems");
-        const data = await response.json();
-        setNavItems(
-          data.map((item) => ({
-            ...item,
-            onClick: () => alert(`Navigate to ${item.text}`),
-          }))
-        );
-      } catch (error) {
-        console.error("Failed to fetch navigation items", error);
-      }
-    }
-    fetchNavItems();
-  }, []);
-
   return (
     <header className="w-full border-b border-black/10 bg-black/70 backdrop-blur-xl">
-      <div className="mx-auto max-w-6xl px-5 py-3 flex items-center">
+      <div className="mx-auto max-w-8xl px-8 py-4 flex">
         
         {/* LEFT: Logo + Brand */}
         <div className="flex items-center gap-3 shrink-0">
           <img
-            src="https://cdn.builder.io/api/v1/image/assets/TEMP/96ed444f12f2297ccd4006841bd1831940e6f23d36396492d16831d2cdf15c29?apiKey=5b7d47d822c447fbbf3f0faf7f51790e&"
-            className="h-9 w-9"
+            src="https://www.google.com/url?sa=t&source=web&rct=j&url=https%3A%2F%2Fwww.istockphoto.com%2Fphotos%2Fkawaii-penguin&ved=0CBYQjRxqFwoTCNCm_fG0lJIDFQAAAAAdAAAAABAj&opi=89978449"
+            className="h-12 w-12"
             alt="Logo"
           />
-          <span className="uppercase font-extrabold text-lg text-white">
-            Harmony
+          <span className="uppercase font-extrabold text-lg text-left text-white">
+            Charit.able
           </span>
         </div>
 
         {/* RIGHT: Nav + CTA */}
-        <div className="ml-auto flex items-center gap-4">
-          <nav className="hidden md:flex items-center gap-2">
+        <div className="flex items-center ml-auto">
+          <nav className="hidden md:flex items-center gap-4 mr-6">
             {navItems.map((item, index) => (
               <NavItem
                 key={index}
@@ -67,7 +51,7 @@ function Navbar() {
           </nav>
 
           <button
-            className="shrink-0 px-5 py-2 text-sm font-medium text-white rounded-full bg-black hover:bg-black/80 transition"
+            className="shrink-0 px-6 py-3 font-medium text-green-400 text-lg rounded-full bg-black hover:bg-black/80 transition"
             onClick={() => alert("Donate Now button clicked")}
           >
             Donate Now
