@@ -2,7 +2,14 @@ import React, { useMemo, useState } from "react";
 import { card_info } from "../data/card_info";
 import { useNavigate } from "react-router-dom";
 
-function Card({ slug, title, description, imageUrl }) {
+interface CardProps {
+  slug: string;
+  title: string;
+  description: string;
+  imageUrl: string;
+}
+
+function Card({ slug, title, description, imageUrl }: CardProps) {
   const navigate = useNavigate();
 
   const handleClick = () => {
@@ -127,7 +134,7 @@ const CardGrid = () => {
         </div>
 
         <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-          {pageCards.map((card, index) => (
+          {pageCards.map((card: CardProps, index: number) => (
             <Card
               key={card.slug ?? `${card.title}-${index}`}
               slug={card.slug}                 // ✅ pass slug

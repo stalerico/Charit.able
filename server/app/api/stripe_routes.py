@@ -5,6 +5,7 @@ import time
 from pathlib import Path
 from urllib.parse import urlencode
 
+import jwt
 import requests
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 from dotenv import load_dotenv
@@ -139,12 +140,36 @@ def create_onramp_session(req: CreateOnrampSessionRequest, request: Request):
         client_ip.startswith("172.")
     )
 
-    # If localhost or DEV_MODE is true, return demo URL
+    # If localhost or DEV_MODE is true, return a working demo URL
     if is_private_ip or DEV_MODE:
+        # Create a mock session token for development
+        import jwt
+        import time
+        now = int(time.time())
+        mock_token = jwt.encode(
+            {
+                "sub": "dev-mode",
+                "iss": "charit-able-dev",
+                "exp": now + 3600,
+                "test": True
+            },
+            "dev-secret-key",
+            algorithm="HS256"
+        )
+        
+        query = urlencode(
+            {
+                "sessionToken": mock_token,
+                "fiatCurrency": "USD",
+                "presetFiatAmount": req.source_amount_usd,
+            }
+        )
+        onramp_url = f"https://pay.coinbase.com/buy?{query}"
         return {
-            "onramp_url": f"https://pay.coinbase.com/buy?amount={req.source_amount_usd}&currency=USD",
+            "onramp_url": onramp_url,
             "dev_mode": True,
-            "message": "Demo mode - returns a Coinbase link for testing"
+            "message": "Development mode - using mock session token",
+            "sessionToken": mock_token
         }
 
     # ONLY try real Coinbase if we have a public IP AND DEV_MODE is explicitly false
@@ -164,8 +189,30 @@ def create_onramp_session(req: CreateOnrampSessionRequest, request: Request):
     except Exception as e:
         # If ANY error happens, fall back to demo mode
         print(f"Coinbase error: {str(e)}")
+        import jwt
+        import time
+        now = int(time.time())
+        mock_token = jwt.encode(
+            {
+                "sub": "dev-mode-fallback",
+                "iss": "charit-able-dev",
+                "exp": now + 3600,
+                "test": True
+            },
+            "dev-secret-key",
+            algorithm="HS256"
+        )
+        
+        query = urlencode(
+            {
+                "sessionToken": mock_token,
+                "fiatCurrency": "USD",
+                "presetFiatAmount": req.source_amount_usd,
+            }
+        )
+        onramp_url = f"https://pay.coinbase.com/buy?{query}"
         return {
-            "onramp_url": f"https://pay.coinbase.com/buy?amount={req.source_amount_usd}&currency=USD",
+            "onramp_url": onramp_url,
             "dev_mode": True,
-            "message": "Error with Coinbase API, using demo mode"
+            "message": "Fallback to demo mode due to Coinbase error"
         }

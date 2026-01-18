@@ -1,12 +1,8 @@
 import { Routes, Route } from "react-router-dom";
 import "./App.css";
-<<<<<<< HEAD
 
-=======
 import CompanyGrid from "./pages/CompanyGrid.jsx";
->>>>>>> 1697e6169e98e46fd025414d47838f0e2dce3e84
 import Home from "./pages/Home.jsx";
-import CompanyGrid from "./pages/CompanyGrid.jsx";
 import CompanyDashboard from "./pages/CompanyDashboard.tsx";
 import WalletTesting from "./pages/wallet_testing.jsx";
 import Signup from "./pages/Signup.jsx";

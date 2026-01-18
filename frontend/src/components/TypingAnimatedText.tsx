@@ -2,7 +2,7 @@ import { motion, useAnimationControls } from "framer-motion";
 import { useEffect, useState } from "react";
 
 function TypingText({
-  words = ["Charit.able", "Donate with confidence.", "Powered with crypto"],
+  words = ["Charit.able", "Donate with confidence.", "Powered with crypto, Community-focused", "Transparent Donations, Instant Impact",],
   typingSpeed = 150,
   deleteSpeed = 100,
   delayBetweenWords = 1000,
@@ -66,8 +66,8 @@ function TypingText({
   }, [controls]);
 
   return (
-    <div className="w-full h-full flex justify-center pt-10 bg-black/90">
-      <div className="text-3xl font-mono text-blue-300">
+    <div className="w-full h-full flex justify-center pt-20 bg-black/90">
+      <div className="text-2xl font-mono text-blue-300">
         {currentText}
         <motion.span animate={controls}>|</motion.span>
       </div>
