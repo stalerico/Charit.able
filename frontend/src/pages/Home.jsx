@@ -3,6 +3,10 @@ import TypingAnimatedText from "../components/TypingAnimatedText.tsx";
 import Navbar from "../components/navbar.tsx";
 import Donate from "../components/ui/donor_card";
 import RecentSales from "../components/RecentSales.tsx";
+import ReactBeforeSliderComponent from 'react-before-after-slider-component';
+import 'react-before-after-slider-component/dist/build.css';
+import ItemizedBarcode from "../public/images/ItemizedBarcode.jpg";
+import ReceiptOverlay from "../public/images/receipt_overlay.png";
 
 export default function Home() {
   const navigate = useNavigate();
@@ -10,23 +14,74 @@ export default function Home() {
   return (
     <>
       <Navbar />
-      <TypingAnimatedText />
-      <main className="flex flex-col items-center text-center mt-24 px-6">
-        <h1 className="text-4xl font-bold">Welcome to the Home Page</h1>
+      <TypingAnimatedText
+        words={[
+          "Charit.able: Empowering Giving",
+          "Transparent Donations, Instant Impact",
+          "Crypto-powered, Community-focused"
+        ]}
+      />
 
-        <p className="mt-4 text-lg text-gray-600 max-w-xl">
-          This is the main landing page of the application.
+      <main className="flex flex-col items-center text-center mt-24 px-2">
+        {/* Hero Section */}
+        <h1 className="text-5xl font-extrabold text-gray-700 dark:text-white">
+          Give with Confidence, Make a Difference
+        </h1>
+
+        <p className="mt-6 text-lg text-gray-400 dark:text-gray-300 max-w-2xl">
+          Charit.able is a revolutionary platform that connects donors with causes
+          that matter. Powered by blockchain technology, every donation is secure,
+          transparent, and traceable. Experience the future of giving where
+          generosity meets trust.
         </p>
 
-        <div>
-          <button onClick={() => navigate("/test")}>Click me woof woof</button>
-          <button onClick={() => navigate("/wallet_testing")}>jesus is cooking</button>
+        <div className="flex gap-4 mt-8">
+          <button
+            onClick={() => navigate("/signup")}
+            className="px-6 py-3 rounded-full bg-green-500 text-white font-medium hover:bg-green-600 transition"
+          >
+            Join Now
+          </button>
+
+          <button
+            onClick={() => navigate("/wallet_testing")}
+            className="px-6 py-3 rounded-full bg-black text-white font-medium hover:bg-gray-800 transition"
+          >
+            Explore Wallet
+          </button>
         </div>
-          <Donate />
-          <div className="items-center mt-8 w-1/2">
-            <RecentSales />
-          </div>
-          
+
+        <div className="mt-20 w-full max-w-6xl mx-auto flex flex-col md:flex-row gap-8">
+          {/* Donate Card */}
+          <section className="flex-1 bg-black dark:bg-gray-200 p-6 rounded-lg shadow">
+            <h2 className="text-3xl font-bold text-gray-500 dark:text-white mb-6">
+              Join the cause!
+            </h2>
+            <Donate />
+          </section>
+
+          {/* Recent Sales / Impact Section */}
+          <section className="flex-1 bg-black dark:bg-gray-900 p-6 rounded-lg shadow">
+            <h2 className="text-3xl font-bold text-gray-500 dark:text-white mb-6">
+              Recent Impact
+            </h2>
+            <div className="w-full">
+              <RecentSales />
+            </div>
+          </section>
+        </div>
+
+        <ReactBeforeSliderComponent
+          firstImage={FIRST_IMAGE}
+          secondImage={SECOND_IMAGE}
+      />
+
+        {/* Footer Blurb */}
+        <p className="mt-24 mb-12 text-gray-500 dark:text-gray-400 max-w-2xl">
+          Join thousands of contributors worldwide and help make the world a better
+          place. Every donation, no matter the size, creates real impact — instantly
+          visible on our platform.
+        </p>
       </main>
     </>
   );

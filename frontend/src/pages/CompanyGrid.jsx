@@ -2,16 +2,23 @@ import BlogDemo from "../components/BlogDemo";
 import Navbar from "../components/navbar.tsx";
 import CardGrid from "../components/CardGrid";
 
+import {
+  ButtonGroup,
+  ButtonGroupItem,
+} from "../components/base/button-group/button-group";
 
- function CompanyGrid() {
+export default function CompanyGrid() {
   return (
     <>
       <Navbar />
-      <h1>Company</h1>
+      <ButtonGroup />
       <CardGrid />
+      <ButtonGroup selectedKeys={[]}>
+        <ButtonGroupItem id="archive">Archive</ButtonGroupItem>
+        <ButtonGroupItem id="edit">Edit</ButtonGroupItem>
+        <ButtonGroupItem id="delete">Delete</ButtonGroupItem>
+      </ButtonGroup>
       <BlogDemo />
     </>
   );
 }
-
-export default CompanyGrid;

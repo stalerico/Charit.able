@@ -10,11 +10,11 @@ construct-stubs/lib/hex.pyi,sha256=BpaL2P2p7bB9oUtAkMaanHA_Z8JWLT-IZ_V21j6R1Ck,3
 construct-stubs/lib/py3compat.pyi,sha256=-Q8Db_sQy2gvKwyzIl9OOvhqz_TEnc7cDxMMpuLGS7c,618
 construct-stubs/version.pyi,sha256=jXTDom-6iCZfcAaf8qbnAs9dxvlp1JEnqE5kSLSt3YQ,90
 construct_typed/__init__.py,sha256=s33bpxhzvIGOysdV3VdfZR744eh1a2M-JGO1d9C8Nvg,856
-construct_typed/__pycache__/__init__.cpython-313.pyc,,
-construct_typed/__pycache__/dataclass_struct.cpython-313.pyc,,
-construct_typed/__pycache__/generic_wrapper.cpython-313.pyc,,
-construct_typed/__pycache__/tenum.cpython-313.pyc,,
-construct_typed/__pycache__/version.cpython-313.pyc,,
+construct_typed/__pycache__/__init__.cpython-311.pyc,,
+construct_typed/__pycache__/dataclass_struct.cpython-311.pyc,,
+construct_typed/__pycache__/generic_wrapper.cpython-311.pyc,,
+construct_typed/__pycache__/tenum.cpython-311.pyc,,
+construct_typed/__pycache__/version.cpython-311.pyc,,
 construct_typed/dataclass_struct.py,sha256=LNA5NTpu7MhR3Abq9DpO96SOrlY6Or9WH368ceTLo10,9940
 construct_typed/generic_wrapper.py,sha256=KpfIWtadWu1BVjqLUvgVfgMvzDOica5G8aq0VDhdZDU,1523
 construct_typed/py.typed,sha256=47DEQpj8HBSa-_TImW-5JCeuQeRkm5NMpJWZG3hSuFU,0
