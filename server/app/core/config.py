@@ -10,6 +10,7 @@ class Settings(BaseSettings):
     WALLET_ADDRESS: Optional[str] = None
     COINBASE_KEY_NAME: Optional[str] = None
     COINBASE_API_KEY: Optional[str] = None
+    COMPANY_WALLET_ADDRESS: Optional[str] = None
 
     # Solana Configuration
     SOLANA_RPC_URL: str = "https://api.mainnet-beta.solana.com"

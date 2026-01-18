@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import TypingAnimatedText from "../components/TypingAnimatedText.tsx";
 import Navbar from "../components/navbar.tsx";
-import Donate from "../components/ui/donor_card";
+import DonorCard from "../components/ui/donor_card";
 import RecentSales from "../components/RecentSales.tsx";
 import ReactBeforeSliderComponent from "react-before-after-slider-component";
 import "react-before-after-slider-component/dist/build.css"; // import CSS
@@ -11,6 +11,39 @@ import ReceiptOverlay from "../assets/images/ItemizedBarcodeOverlay.jpg";
 
 export default function Home() {
   const navigate = useNavigate();
+  async function startDonation(amount) {
+    const res = await fetch("http://127.0.0.1:8000/api/v1/onramp/session", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        source_amount_usd: amount.toFixed(2),
+      }),
+    });
+
+    if (!res.ok) {
+      let message = "Failed to create onramp session";
+      try {
+        const err = await res.json();
+        if (err && err.detail) {
+          if (typeof err.detail === "string") {
+            message = err.detail;
+          } else if (err.detail.message) {
+            message = err.detail.message;
+          } else {
+            message = JSON.stringify(err.detail);
+          }
+        }
+      } catch (e) {
+        console.error(e);
+      }
+      throw new Error(message);
+    }
+
+    const data = await res.json();
+    return data.onramp_url;
+  }
 
   return (
     <>
@@ -51,37 +84,21 @@ export default function Home() {
             Explore Wallet
           </button>
         </div>
-
-        <div className="mt-20 w-full max-w-6xl mx-auto flex flex-col md:flex-row gap-8">
-          {/* Donate Card */}
-          <section className="flex-1 bg-black dark:bg-gray-200 p-6 rounded-lg shadow">
-            <h2 className="text-3xl font-bold text-gray-500 dark:text-white mb-6">
-              Join the cause!
-            </h2>
-            <Donate />
-          </section>
-
-          {/* Recent Sales / Impact Section */}
-          <section className="flex-1 bg-black dark:bg-gray-900 p-6 rounded-lg shadow">
-            <h2 className="text-3xl font-bold text-gray-500 dark:text-white mb-6">
-              Recent Impact
-            </h2>
-            <div className="w-full">
-              <RecentSales />
-            </div>
-          </section>
-        </div>
-
-        {/* Receipt Verif.
-        <section className="mt-16 w-full flex justify-center">
-          <div className="w-full max-w-md md:max-w-lg lg:max-w-xl pt-16">
-            <h2 className="text-2xl font-semibold mb-4">
-              AI Receipt Scanner Preview
-            </h2>
-            <ReactBeforeSliderComponent
-              firstImage={ItemizedBarcode}
-              secondImage={ReceiptOverlay}
-            />
+          <DonorCard
+            onDonate={async (amount) => {
+              try {
+                const onrampUrl = await startDonation(amount);
+                if (onrampUrl) {
+                  window.location.href = onrampUrl;
+                }
+              } catch (e) {
+                console.error(e);
+                alert(e.message || "Failed to start donation flow");
+              }
+            }}
+          />
+          <div className="items-center mt-8 w-1/2">
+            <RecentSales />
           </div>
         </section> */}
 
