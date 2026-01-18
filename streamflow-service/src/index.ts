@@ -1,7 +1,7 @@
 import express, { Request, Response } from "express";
 import cors from "cors";
 import dotenv from "dotenv";
-import { StreamflowService } from "./streamflow";
+import { StreamflowService, RELEASE_STAGES } from "./streamflow";
 
 dotenv.config();
 
@@ -15,28 +15,51 @@ const PORT = process.env.PORT || 3001;
 const streamflowService = new StreamflowService();
 
 // Health check
-app.get("/health", (req: Request, res: Response) => {
+app.get("/health", (_req: Request, res: Response) => {
   res.json({ status: "healthy", service: "streamflow-onchain" });
 });
 
-// Create a new stream (locks funds in smart contract)
-app.post("/streams/create", async (req: Request, res: Response) => {
-  try {
-    const { recipientPublicKey, totalAmountLamports, tokenMint } = req.body;
+// Get milestone configuration
+app.get("/milestones", (_req: Request, res: Response) => {
+  res.json({ stages: RELEASE_STAGES });
+});
 
-    if (!recipientPublicKey || !totalAmountLamports) {
-      return res.status(400).json({ error: "Missing required fields" });
+// Calculate milestone amounts for a donation
+app.post("/milestones/calculate", (req: Request, res: Response) => {
+  try {
+    const { totalAmountLamports } = req.body;
+
+    if (!totalAmountLamports) {
+      return res.status(400).json({ error: "Missing totalAmountLamports" });
     }
 
-    const result = await streamflowService.createStream({
+    const milestones = streamflowService.calculateMilestoneAmounts(BigInt(totalAmountLamports));
+    res.json({ milestones });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Create a milestone stream (release funds for a verified milestone)
+app.post("/streams/milestone", async (req: Request, res: Response) => {
+  try {
+    const { recipientPublicKey, amountLamports, milestoneIndex, milestoneName, tokenMint } = req.body;
+
+    if (!recipientPublicKey || !amountLamports || milestoneIndex === undefined || !milestoneName) {
+      return res.status(400).json({ error: "Missing required fields: recipientPublicKey, amountLamports, milestoneIndex, milestoneName" });
+    }
+
+    const result = await streamflowService.createMilestoneStream({
       recipientPublicKey,
-      totalAmountLamports: BigInt(totalAmountLamports),
-      tokenMint: tokenMint || "So11111111111111111111111111111111111111112", // Native SOL
+      amountLamports: BigInt(amountLamports),
+      milestoneIndex,
+      milestoneName,
+      tokenMint,
     });
 
     res.json(result);
   } catch (error: any) {
-    console.error("Create stream error:", error);
+    console.error("Create milestone stream error:", error);
     res.status(500).json({ error: error.message });
   }
 });
@@ -85,7 +108,7 @@ app.get("/streams/:streamId", async (req: Request, res: Response) => {
   try {
     const { streamId } = req.params;
 
-    const result = await streamflowService.getStream(streamId);
+    const result = await streamflowService.getStream(Array.isArray(streamId) ? streamId[0] : streamId);
 
     if (!result) {
       return res.status(404).json({ error: "Stream not found" });
