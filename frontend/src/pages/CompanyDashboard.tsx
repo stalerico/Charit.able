@@ -1,5 +1,17 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import Navbar from "../components/navbar";
+
+// Receipt categories for verification
+const RECEIPT_CATEGORIES = [
+  "donation",
+  "charity",
+  "receipt",
+  "payment",
+  "purchase"
+];
+
+// Confidence threshold for passing
+const CONFIDENCE_THRESHOLD = 0.7;
 
 // Mock data for campaigns
 const mockCampaigns = [
@@ -35,12 +47,126 @@ const mockDonations = [
   { id: 6, donor: "James P.", amount: 100, campaign: "Clean Water Initiative", time: "5 hours ago", txHash: "0x4e5f...6a7b", avatar: "J" },
 ];
 
-function CompanyDashboard() {
-  const [activeTab, setActiveTab] = useState("overview");
+// Types for receipt analysis
+interface AnalysisResult {
+  passed: boolean;
+  confidence: number;
+  matched_categories: string[];
+  missing_categories: string[];
+  explanation: string;
+}
 
+function CompanyDashboard() {
   const totalRaised = mockCampaigns.reduce((sum, c) => sum + c.raised, 0);
   const totalDonors = mockCampaigns.reduce((sum, c) => sum + c.donors, 0);
   const activeCampaigns = mockCampaigns.length;
+
+  // Receipt analyzer state
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [filePreview, setFilePreview] = useState<string | null>(null);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
+  const [attemptsRemaining, setAttemptsRemaining] = useState(2);
+  const [analysisStatus, setAnalysisStatus] = useState<'idle' | 'analyzing' | 'passed' | 'failed'>('idle');
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Handle file selection
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setSelectedFile(file);
+      setFilePreview(URL.createObjectURL(file));
+      setAnalysisResult(null);
+      setAnalysisStatus('idle');
+    }
+  };
+
+  // Handle file drop
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    const file = e.dataTransfer.files?.[0];
+    if (file && file.type.startsWith('image/')) {
+      setSelectedFile(file);
+      setFilePreview(URL.createObjectURL(file));
+      setAnalysisResult(null);
+      setAnalysisStatus('idle');
+    }
+  };
+
+  // Analyze receipt
+  const analyzeReceipt = async () => {
+    if (!selectedFile || attemptsRemaining <= 0) return;
+
+    setIsAnalyzing(true);
+    setAnalysisStatus('analyzing');
+
+    try {
+      // Convert file to base64 for API
+      const reader = new FileReader();
+      reader.readAsDataURL(selectedFile);
+
+      reader.onload = async () => {
+        const base64Data = reader.result as string;
+
+        try {
+          const response = await fetch('http://localhost:8001/verify', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              campaignId: 'receipt-verification',
+              fileUrl: base64Data,
+              categories: RECEIPT_CATEGORIES,
+            }),
+          });
+
+          if (!response.ok) {
+            throw new Error('Verification failed');
+          }
+
+          const result: AnalysisResult = await response.json();
+          setAnalysisResult(result);
+
+          // Check if passed based on confidence threshold
+          if (result.confidence >= CONFIDENCE_THRESHOLD) {
+            setAnalysisStatus('passed');
+          } else {
+            setAttemptsRemaining(prev => prev - 1);
+            setAnalysisStatus('failed');
+          }
+        } catch (error) {
+          console.error('Analysis error:', error);
+          setAnalysisResult({
+            passed: false,
+            confidence: 0,
+            matched_categories: [],
+            missing_categories: RECEIPT_CATEGORIES,
+            explanation: 'Failed to analyze receipt. Please try again.',
+          });
+          setAttemptsRemaining(prev => prev - 1);
+          setAnalysisStatus('failed');
+        } finally {
+          setIsAnalyzing(false);
+        }
+      };
+    } catch (error) {
+      console.error('File read error:', error);
+      setIsAnalyzing(false);
+      setAnalysisStatus('failed');
+    }
+  };
+
+  // Reset for retry
+  const resetAnalysis = () => {
+    setSelectedFile(null);
+    setFilePreview(null);
+    setAnalysisResult(null);
+    setAnalysisStatus('idle');
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 relative overflow-hidden">
@@ -53,63 +179,17 @@ function CompanyDashboard() {
 
       <Navbar />
 
-      <div className="flex relative z-10">
-        {/* Sidebar */}
-        <aside className="w-64 min-h-[calc(100vh-73px)] bg-slate-900/80 backdrop-blur-xl border-r border-slate-700/50 p-6 sticky top-[73px] hidden lg:block">
-          {/* Organization Info */}
-          <div className="mb-8">
-            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center shadow-lg shadow-violet-500/30 mb-4">
-              <span className="text-2xl font-bold text-white">HF</span>
-            </div>
-            <h2 className="font-bold text-white">Hope Foundation</h2>
-            <p className="text-sm text-slate-400">Verified Organization</p>
-          </div>
-
-          {/* Navigation */}
-          <nav className="space-y-2">
-            {[
-              { key: "overview", icon: "M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6", label: "Overview" },
-              { key: "campaigns", icon: "M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10", label: "Campaigns" },
-              { key: "donations", icon: "M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z", label: "Donations" },
-              { key: "withdraw", icon: "M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z", label: "Withdraw" },
-              { key: "settings", icon: "M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z", label: "Settings" },
-            ].map((item) => (
-              <button
-                key={item.key}
-                onClick={() => setActiveTab(item.key)}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
-                  activeTab === item.key
-                    ? 'bg-gradient-to-r from-violet-500 to-fuchsia-500 text-white shadow-lg shadow-violet-500/25'
-                    : 'text-slate-300 hover:bg-slate-800/80 hover:text-white'
-                }`}
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={item.icon} />
-                </svg>
-                <span className="font-medium">{item.label}</span>
-              </button>
-            ))}
-          </nav>
-        </aside>
-
+      <div className="relative z-10">
         {/* Main Content */}
-        <main className="flex-1 p-4 lg:p-8">
+        <main className="p-4 lg:p-8 max-w-7xl mx-auto">
           {/* Header */}
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
-            <div>
-              <h1 className="text-3xl font-bold text-white">
-                Dashboard
-              </h1>
-              <p className="text-slate-400 mt-1">
-                Welcome back! Here's your fundraising overview.
-              </p>
-            </div>
-            <button className="px-6 py-3 rounded-xl bg-gradient-to-r from-violet-600 via-fuchsia-600 to-rose-500 text-white font-semibold shadow-lg shadow-violet-500/25 hover:shadow-violet-500/40 hover:scale-105 transform transition-all duration-300 flex items-center gap-2">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-              </svg>
-              New Campaign
-            </button>
+          <div className="mb-8">
+            <h1 className="text-3xl font-bold text-white">
+              Dashboard
+            </h1>
+            <p className="text-slate-400 mt-1">
+              Welcome back! Here's your fundraising overview.
+            </p>
           </div>
 
           {/* Stats Cards */}
@@ -142,19 +222,16 @@ function CompanyDashboard() {
           <div className="grid lg:grid-cols-3 gap-6 lg:gap-8">
             {/* Campaigns Section */}
             <div className="lg:col-span-2 space-y-6">
-              <div className="flex items-center justify-between">
-                <h2 className="text-xl font-bold text-white-800 dark:text-white">Your Campaigns</h2>
-                <button className="text-sm text-violet-600 dark:text-violet-400 font-medium hover:underline">View All</button>
-              </div>
+              <h2 className="text-xl font-bold text-white">Your Campaigns</h2>
 
               {mockCampaigns.map((campaign) => {
   const progress = (campaign.raised / campaign.goal) * 100;
 
   return (
-    <div key={campaign.id} className="bg-gray-300 rounded-2xl shadow-xl overflow-hidden hover:bg-gray-400 transition-colors">
+    <div key={campaign.id} className="bg-slate-800/90 backdrop-blur-xl rounded-2xl shadow-xl overflow-hidden border border-slate-700/50 hover:border-violet-500/30 transition-all duration-300">
       <div className="flex flex-col md:flex-row">
         {/* Campaign Image */}
-        <div className="md:w-48 h-48 md:h-auto bg-gray-400 flex-shrink-0 flex items-center justify-center">
+        <div className="md:w-48 h-48 md:h-auto bg-slate-700 flex-shrink-0 flex items-center justify-center">
           <svg
             className="w-14 h-14 text-slate-400"
             fill="none"
@@ -177,7 +254,7 @@ function CompanyDashboard() {
               <h3 className="text-lg font-bold text-white">
                 {campaign.title}
               </h3>
-              <p className="text-sm text-gray-700 mt-1">
+              <p className="text-sm text-slate-400 mt-1">
                 {campaign.description}
               </p>
             </div>
@@ -193,12 +270,12 @@ function CompanyDashboard() {
               <span className="font-semibold text-white">
                 ${campaign.raised.toLocaleString()} raised
               </span>
-              <span className="text-gray-700">
+              <span className="text-slate-300">
                 of ${campaign.goal.toLocaleString()}
               </span>
             </div>
 
-            <div className="h-2 bg-gray-400 rounded-full overflow-hidden">
+            <div className="h-2 bg-slate-700 rounded-full overflow-hidden">
               <div
                 className="h-full bg-violet-500 rounded-full transition-all duration-500"
                 style={{ width: `${Math.min(progress, 100)}%` }}
@@ -207,7 +284,7 @@ function CompanyDashboard() {
           </div>
 
           {/* Stats */}
-          <div className="flex flex-wrap gap-4 text-sm text-gray-700">
+          <div className="flex flex-wrap gap-4 text-sm text-slate-400">
             <div className="flex items-center gap-2">
               <svg className="w-4 h-4 text-violet-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -234,6 +311,199 @@ function CompanyDashboard() {
     </div>
   );
 })}
+
+              {/* Receipt Analyzer Section */}
+              <div className="mt-8">
+                {/* Deadline Notice */}
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="flex items-center gap-2 px-4 py-2 bg-amber-500/20 border border-amber-500/30 rounded-xl">
+                    <svg className="w-5 h-5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span className="text-amber-400 font-semibold text-sm">1 day left before receipts are due</span>
+                  </div>
+                </div>
+
+                <h2 className="text-xl font-bold text-white mb-4">Receipt Analyzer</h2>
+
+                <div className="bg-slate-800/90 backdrop-blur-xl rounded-2xl shadow-xl border border-slate-700/50 overflow-hidden">
+                  <div className="p-6">
+                    {/* Success State */}
+                    {analysisStatus === 'passed' && (
+                      <div className="text-center py-8">
+                        <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-emerald-500/20 flex items-center justify-center">
+                          <svg className="w-10 h-10 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                          </svg>
+                        </div>
+                        <h3 className="text-2xl font-bold text-white mb-2">Receipt Verified!</h3>
+                        <p className="text-slate-400 mb-4">Your receipt has been successfully analyzed and approved.</p>
+                        <div className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-500/20 rounded-lg">
+                          <span className="text-emerald-400 font-semibold">Confidence: {analysisResult ? Math.round(analysisResult.confidence * 100) : 0}%</span>
+                        </div>
+                        {analysisResult && (
+                          <div className="mt-4 text-left bg-slate-900/50 rounded-xl p-4">
+                            <p className="text-sm text-slate-400 mb-2">Categories matched:</p>
+                            <div className="flex flex-wrap gap-2">
+                              {analysisResult.matched_categories.map((cat, i) => (
+                                <span key={i} className="px-2 py-1 bg-emerald-500/20 text-emerald-400 rounded-lg text-xs font-medium">
+                                  {cat}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* No More Attempts State */}
+                    {analysisStatus === 'failed' && attemptsRemaining <= 0 && (
+                      <div className="text-center py-8">
+                        <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-rose-500/20 flex items-center justify-center">
+                          <svg className="w-10 h-10 text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                        </div>
+                        <h3 className="text-2xl font-bold text-white mb-2">Verification Failed</h3>
+                        <p className="text-slate-400 mb-4">You've used all your attempts. Please contact support for assistance.</p>
+                        {analysisResult && (
+                          <div className="mt-4 text-left bg-slate-900/50 rounded-xl p-4">
+                            <p className="text-sm text-rose-400">{analysisResult.explanation}</p>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Upload & Analyze State */}
+                    {(analysisStatus === 'idle' || analysisStatus === 'analyzing' || (analysisStatus === 'failed' && attemptsRemaining > 0)) && (
+                      <>
+                        {/* Failed with retry available */}
+                        {analysisStatus === 'failed' && attemptsRemaining > 0 && (
+                          <div className="mb-6 p-4 bg-amber-500/20 border border-amber-500/30 rounded-xl">
+                            <div className="flex items-start gap-3">
+                              <svg className="w-6 h-6 text-amber-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                              </svg>
+                              <div>
+                                <p className="text-amber-400 font-semibold">Analysis didn't meet threshold</p>
+                                <p className="text-amber-300/70 text-sm mt-1">
+                                  You have <span className="font-bold">{attemptsRemaining} more {attemptsRemaining === 1 ? 'chance' : 'chances'}</span> to submit a valid receipt.
+                                </p>
+                                {analysisResult && (
+                                  <p className="text-amber-300/60 text-sm mt-2">
+                                    Previous confidence: {Math.round(analysisResult.confidence * 100)}% (needs {Math.round(CONFIDENCE_THRESHOLD * 100)}%)
+                                  </p>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Category Tags */}
+                        <div className="mb-6">
+                          <p className="text-sm text-slate-400 mb-3">Verifying receipt categories:</p>
+                          <div className="flex flex-wrap gap-2">
+                            {RECEIPT_CATEGORIES.map((cat, i) => (
+                              <span
+                                key={i}
+                                className="px-3 py-1.5 bg-violet-500/20 text-violet-400 rounded-lg text-sm font-medium border border-violet-500/30"
+                              >
+                                {cat}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Upload Area */}
+                        <div
+                          className={`relative border-2 border-dashed rounded-xl p-8 text-center transition-all duration-300 ${
+                            filePreview
+                              ? 'border-violet-500/50 bg-violet-500/10'
+                              : 'border-slate-600 hover:border-violet-500/50 hover:bg-slate-700/30'
+                          }`}
+                          onDragOver={(e) => e.preventDefault()}
+                          onDrop={handleDrop}
+                        >
+                          <input
+                            ref={fileInputRef}
+                            type="file"
+                            accept="image/*"
+                            onChange={handleFileSelect}
+                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                          />
+
+                          {filePreview ? (
+                            <div className="space-y-4">
+                              <img
+                                src={filePreview}
+                                alt="Receipt preview"
+                                className="max-h-48 mx-auto rounded-lg shadow-lg"
+                              />
+                              <p className="text-sm text-slate-400">{selectedFile?.name}</p>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  resetAnalysis();
+                                }}
+                                className="text-sm text-violet-400 hover:text-violet-300"
+                              >
+                                Choose different file
+                              </button>
+                            </div>
+                          ) : (
+                            <div className="space-y-4">
+                              <div className="w-16 h-16 mx-auto rounded-full bg-slate-700 flex items-center justify-center">
+                                <svg className="w-8 h-8 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                </svg>
+                              </div>
+                              <div>
+                                <p className="text-white font-medium">Upload your receipt</p>
+                                <p className="text-sm text-slate-400 mt-1">Drag and drop or click to browse</p>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Analyze Button */}
+                        <button
+                          onClick={analyzeReceipt}
+                          disabled={!selectedFile || isAnalyzing}
+                          className={`w-full mt-6 py-4 rounded-xl font-semibold text-lg transition-all duration-300 flex items-center justify-center gap-3 ${
+                            selectedFile && !isAnalyzing
+                              ? 'bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white hover:from-violet-500 hover:to-fuchsia-500 shadow-lg shadow-violet-500/25'
+                              : 'bg-slate-700 text-slate-400 cursor-not-allowed'
+                          }`}
+                        >
+                          {isAnalyzing ? (
+                            <>
+                              <svg className="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                              </svg>
+                              Analyzing Receipt...
+                            </>
+                          ) : (
+                            <>
+                              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                              </svg>
+                              Analyze Receipt
+                            </>
+                          )}
+                        </button>
+
+                        {/* Attempts Counter */}
+                        <div className="mt-4 text-center">
+                          <span className="text-sm text-slate-500">
+                            Attempts remaining: <span className={`font-semibold ${attemptsRemaining === 1 ? 'text-amber-400' : 'text-slate-400'}`}>{attemptsRemaining}</span>
+                          </span>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </div>
+              </div>
             </div>
 
             {/* Recent Donations */}
@@ -248,16 +518,16 @@ function CompanyDashboard() {
                 </div>
 
                 <div className="relative">
-                  <div className="bg-gray-300 rounded-2xl shadow-xl overflow-hidden">
-                    <div className="divide-y divide-gray-400 max-h-[500px] overflow-y-auto">
+                  <div className="bg-slate-800/90 backdrop-blur-xl rounded-2xl shadow-xl overflow-hidden border border-slate-700/50">
+                    <div className="divide-y divide-slate-700/50 max-h-[500px] overflow-y-auto">
                       {mockDonations.map((donation) => (
                         <div
                           key={donation.id}
-                          className="p-4 hover:bg-gray-400 transition-colors"
+                          className="p-4 hover:bg-slate-700/50 transition-colors"
                         >
                           <div className="flex items-center gap-3">
                             {/* Avatar */}
-                            <div className="w-10 h-10 rounded-full bg-gray-400 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+                            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
                               {donation.avatar}
                             </div>
 
@@ -271,13 +541,13 @@ function CompanyDashboard() {
                                   ${donation.amount}
                                 </span>
                               </div>
-                              <p className="text-xs text-gray-700 truncate">
+                              <p className="text-xs text-slate-400 truncate">
                                 {donation.campaign}
                               </p>
                             </div>
 
                             {/* Time */}
-                            <span className="text-xs text-gray-700 flex-shrink-0">
+                            <span className="text-xs text-slate-400 flex-shrink-0">
                               {donation.time}
                             </span>
                           </div>
@@ -285,7 +555,7 @@ function CompanyDashboard() {
                           {/* Transaction Hash */}
                           <div className="mt-2 flex items-center gap-2">
                             <svg
-                              className="w-3 h-3 text-gray-600"
+                              className="w-3 h-3 text-slate-500"
                               fill="none"
                               stroke="currentColor"
                               viewBox="0 0 24 24"
@@ -297,7 +567,7 @@ function CompanyDashboard() {
                                 d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"
                               />
                             </svg>
-                            <span className="text-xs font-mono text-gray-700">
+                            <span className="text-xs font-mono text-slate-400">
                               {donation.txHash}
                             </span>
                           </div>
@@ -306,8 +576,8 @@ function CompanyDashboard() {
                     </div>
 
                     {/* View All Link */}
-                    <div className="p-4 border-t border-gray-400 bg-gray-300">
-                      <button className="w-full text-center text-sm text-white font-medium hover:underline">
+                    <div className="p-4 border-t border-slate-700/50 bg-slate-900/50">
+                      <button className="w-full text-center text-sm text-violet-400 font-medium hover:underline">
                         View All Transactions
                       </button>
                     </div>
@@ -318,19 +588,19 @@ function CompanyDashboard() {
               {/* Quick Withdraw Card */}
               <div className="group relative">
                 <div className="absolute -inset-1 bg-gradient-to-r from-violet-500 via-fuchsia-500 to-rose-500 rounded-2xl opacity-30 blur-xl"></div>
-                <div className="relative bg-gray-300 p-6 rounded-2xl shadow-xl">
+                <div className="relative bg-gradient-to-r from-violet-600 via-fuchsia-600 to-rose-500 p-6 rounded-2xl shadow-xl">
                   <div className="flex items-center justify-between mb-4">
                     <div>
-                      <p className="text-gray-700 text-sm">Available Balance</p>
+                      <p className="text-violet-100 text-sm">Available Balance</p>
                       <p className="text-3xl font-bold text-white">$12,450</p>
                     </div>
-                    <div className="w-12 h-12 rounded-xl bg-gray-400 flex items-center justify-center">
+                    <div className="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center">
                       <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
                       </svg>
                     </div>
                   </div>
-                  <button className="w-full py-3 rounded-xl bg-gray-400 text-white font-semibold hover:bg-gray-500 transition-colors">
+                  <button className="w-full py-3 rounded-xl bg-white text-violet-600 font-semibold hover:bg-violet-50 transition-colors">
                     Withdraw Funds
                   </button>
                 </div>

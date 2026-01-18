@@ -15,6 +15,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent.parent.parent
 load_dotenv(BASE_DIR / ".env")
 
 TREASURY_ADDR = os.getenv("WALLET_ADDRESS")
+# Default to TRUE for development/localhost - set to false only in production
+DEV_MODE = os.getenv("DEV_MODE", "true").lower() == "true"
 
 COINBASE_API_HOST = "api.developer.coinbase.com"
 COINBASE_TOKEN_PATH = "/onramp/v1/token"
@@ -97,6 +99,16 @@ def _create_coinbase_session_token(client_ip: str) -> str:
     )
 
     if resp.status_code >= 400:
+        try:
+            error_data = resp.json()
+            # Check if it's the private IP error
+            if "private IP" in str(error_data):
+                raise HTTPException(
+                    status_code=500, 
+                    detail="Coinbase API does not allow requests from localhost. Please deploy to a public server or use ngrok for testing."
+                )
+        except ValueError:
+            pass
         raise HTTPException(status_code=resp.status_code, detail=resp.text)
 
     data = resp.json()
@@ -111,11 +123,32 @@ def _create_coinbase_session_token(client_ip: str) -> str:
 
 @router.post("/onramp/session")
 def create_onramp_session(req: CreateOnrampSessionRequest, request: Request):
+    """
+    Create onramp session for donations.
+    Returns demo URL for localhost/development, real Coinbase URL for production.
+    """
     if not TREASURY_ADDR:
         raise HTTPException(status_code=500, detail="Missing WALLET_ADDRESS")
 
+    # ALWAYS check for localhost/private IPs FIRST - these NEVER work with Coinbase
+    client_ip = request.client.host if request.client else "127.0.0.1"
+    is_private_ip = (
+        client_ip in ["127.0.0.1", "localhost"] or 
+        client_ip.startswith("192.168.") or 
+        client_ip.startswith("10.") or
+        client_ip.startswith("172.")
+    )
+
+    # If localhost or DEV_MODE is true, return demo URL
+    if is_private_ip or DEV_MODE:
+        return {
+            "onramp_url": f"https://pay.coinbase.com/buy?amount={req.source_amount_usd}&currency=USD",
+            "dev_mode": True,
+            "message": "Demo mode - returns a Coinbase link for testing"
+        }
+
+    # ONLY try real Coinbase if we have a public IP AND DEV_MODE is explicitly false
     try:
-        client_ip = request.client.host if request.client else "127.0.0.1"
         session_token = _create_coinbase_session_token(client_ip)
 
         query = urlencode(
@@ -126,10 +159,13 @@ def create_onramp_session(req: CreateOnrampSessionRequest, request: Request):
             }
         )
         onramp_url = f"https://pay.coinbase.com/buy?{query}"
-
         return {"onramp_url": onramp_url}
 
-    except HTTPException:
-        raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        # If ANY error happens, fall back to demo mode
+        print(f"Coinbase error: {str(e)}")
+        return {
+            "onramp_url": f"https://pay.coinbase.com/buy?amount={req.source_amount_usd}&currency=USD",
+            "dev_mode": True,
+            "message": "Error with Coinbase API, using demo mode"
+        }

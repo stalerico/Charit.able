@@ -105,15 +105,15 @@ const CardGrid = () => {
       <div className="relative mx-auto max-w-6xl p-6">
         <div className="mb-6 flex items-end justify-between gap-4">
           <div>
-            <h2 className="text-xl font-semibold text-white">
+            <h2 className="text-5xl font-mono-bold text-white">
               Donation Organizations
             </h2>
-            <p className="mt-1 text-sm text-white/60">
+            <p className="mt-1 text-md text-white/60 pt-5">
               Browse orgs and click a card to open details.
             </p>
           </div>
 
-          <div className="text-sm text-white/60">
+          <div className="text-md text-white/60">
             Showing{" "}
             <span className="font-medium text-white/90">
               {(page - 1) * PAGE_SIZE + 1}–

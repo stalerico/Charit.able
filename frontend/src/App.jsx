@@ -1,44 +1,37 @@
 import { Routes, Route } from "react-router-dom";
 import "./App.css";
-import CompanyGrid from "./pages/CompanyGrid.jsx";
-import CompanyDashboard from "./pages/CompanyDashboard.jsx";
+
 import Home from "./pages/Home.jsx";
+import CompanyGrid from "./pages/CompanyGrid.jsx";
+import CompanyDashboard from "./pages/CompanyDashboard.tsx";
 import WalletTesting from "./pages/wallet_testing.jsx";
 import Signup from "./pages/Signup.jsx";
-import CompanyDashboard from "./pages/CompanyDashboard";
-import ReceiptSliderDemo from "./pages/ReceiptSlider";
+import ReceiptSliderDemo from "./pages/ReceiptSlider.tsx";
 import CharityPage from "./pages/CharityPage.jsx";
+import FAQ from "./pages/FAQ.jsx";
+import Pricing from "./pages/Pricing.jsx";
+import FloatingCircles from "./components/floatingcircles.tsx";
 
 function App() {
-<<<<<<< HEAD
   return (
-    <>
-      {/* App Routes */}
+    <div className="relative min-h-screen bg-black">
+      {/* Floating background */}
+      <FloatingCircles />
+
+      {/* Your routes */}
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/donate" element={<CompanyGrid />} />
-        <Route path="/wallet_testing" element={<WalletTesting />} />
+        <Route path="/company-dashboard" element={<CompanyDashboard />} />
+        <Route path="/wallet-testing" element={<WalletTesting />} />
         <Route path="/signup" element={<Signup />} />
-        <Route path="/companydashboard" element={<CompanyDashboard />} />
         <Route path="/receipt-demo" element={<ReceiptSliderDemo />} />
         <Route path="/charity/:slug" element={<CharityPage />} />
+        <Route path="/faq" element={<FAQ />} />
+        <Route path="/pricing" element={<Pricing />} />
       </Routes>
-    </>
+    </div>
   );
-=======
-    return (
-        <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/donate" element={<CompanyGrid />} />
-            <Route path="/company-dashboard" element={<CompanyDashboard />} />
-            <Route path="/wallet_testing" element={<WalletTesting />} />
-            <Route path="/signup" element={<Signup />} />
-            <Route path="/company" element={<CompanyDashboard />} />
-            <Route path="/receipt-demo" element={<ReceiptSliderDemo />} />
-        </Routes>
-    );
->>>>>>> f7dcbad1f2ff11fa00f985d3835d7908f6bef8d8
 }
-
 
 export default App;

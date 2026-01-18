@@ -21,7 +21,7 @@ export const charity_info = {
   },
 
   "united-way": {
-    trustScore: 76,
+    trustScore: 64,
     category: "Community Development",
     website: "https://www.unitedway.org",
     bannerUrl: "../../public/images/unitedway_banner.png",
@@ -58,7 +58,7 @@ export const charity_info = {
     ],
   },
     "doctors-without-borders": {
-    trustScore: 91,
+    trustScore: 85,
     category: "Children & Education",
     website: "https://www.unicefusa.org",
     bannerUrl: "../../public/images/dwob_banner.png",
@@ -75,11 +75,11 @@ export const charity_info = {
       { ts: "2026-01-14", type: "Donation received", detail: "$900K escrowed" },
     ],
   },
-    "unicef-usa": {
-    trustScore: 91,
+    "save-the-children": {
+    trustScore: 20,
     category: "Children & Education",
     website: "https://www.unicefusa.org",
-    bannerUrl: "../../public/images/unicef_banner.jpeg",
+    bannerUrl: "../../public/images/stc_logo.png",
 
     impact: {
       fundsTracked: "$18.9M",
@@ -93,11 +93,11 @@ export const charity_info = {
       { ts: "2026-01-14", type: "Donation received", detail: "$900K escrowed" },
     ],
   },
-    "unicef-usa": {
+    "feeding-america": {
     trustScore: 91,
     category: "Children & Education",
     website: "https://www.unicefusa.org",
-    bannerUrl: "../../public/images/unicef_banner.jpeg",
+    bannerUrl: "../../public/images/fa-social.png",
 
     impact: {
       fundsTracked: "$18.9M",

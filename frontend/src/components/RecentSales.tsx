@@ -30,18 +30,19 @@ export default function RecentSales() {
   return (
     <Card
       className="
-        group relative 
-        max-w-3xl 
-        rounded-xl 
-        border border-white/10 
-        bg-gray-900 
-        px-10 py-6 
-        shadow-2xl 
-        transition-all 
-        hover:border-green-500/60 
+        group relative
+        w-full h-full
+        rounded-xl
+        border border-white/10
+        bg-gray-900
+        px-10 py-6
+        shadow-2xl
+        transition-all
+        hover:border-green-500/60
         hover:shadow-green-500/30
       "
     >
+
       {/* Glow */}
       <div className="
         pointer-events-none 
@@ -57,7 +58,7 @@ export default function RecentSales() {
       " />
 
       <CardHeader>
-        <CardTitle className="text-3xl font-bold text-gray-300">
+        <CardTitle className="text-4xl font-bold text-gray-300">
           Recent Impact
         </CardTitle>
       </CardHeader>
