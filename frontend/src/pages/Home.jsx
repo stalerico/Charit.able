@@ -109,6 +109,6 @@ export default function Home() {
           visible on our platform.
         </p>
       </main>
-    </>
+   </>
   );
 }
