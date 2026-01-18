@@ -112,7 +112,7 @@ def _create_coinbase_session_token(client_ip: str) -> str:
         raise HTTPException(status_code=resp.status_code, detail=resp.text)
 
     data = resp.json()
-    token = data.get("token") or data.get("data", {}).get("token")
+    token = data.get("data", {}).get("token")
     if not token:
         raise HTTPException(
             status_code=500,
