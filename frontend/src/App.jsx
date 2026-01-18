@@ -1,7 +1,6 @@
 import { Routes, Route } from "react-router-dom";
 import "./App.css";
 import CompanyGrid from "./pages/CompanyGrid.jsx";
-import CompanyDashboard from "./pages/CompanyDashboard.jsx";
 import Home from "./pages/Home.jsx";
 import WalletTesting from "./pages/wallet_testing.jsx";
 import Signup from "./pages/Signup.jsx";
