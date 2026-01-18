@@ -57,11 +57,11 @@ export const charity_info = {
       { ts: "2026-01-14", type: "Donation received", detail: "$900K escrowed" },
     ],
   },
-    "dwob": {
+    "doctors-without-borders": {
     trustScore: 91,
     category: "Children & Education",
     website: "https://www.unicefusa.org",
-    bannerUrl: "../../public/images/unicef_banner.jpeg",
+    bannerUrl: "../../public/images/dwob_banner.png",
 
     impact: {
       fundsTracked: "$18.9M",

@@ -1,25 +1,21 @@
-import {
-  StreamflowSolana,
-  ICluster,
-  ICreateStreamData,
-  IWithdrawData,
-  ICancelData,
-  getBN,
-} from "@streamflow/stream";
-import { Keypair, PublicKey, Connection, clusterApiUrl } from "@solana/web3.js";
+import { StreamflowSolana, ICluster, ICreateStreamData, IWithdrawData, ICancelData } from "@streamflow/stream";
+import { Keypair, clusterApiUrl } from "@solana/web3.js";
+import BN from "bn.js";
 import bs58 from "bs58";
 
-// Release stages as percentages
-const RELEASE_STAGES = [
-  { index: 0, percentage: 5 },
-  { index: 1, percentage: 15 },
-  { index: 2, percentage: 30 },
-  { index: 3, percentage: 50 },
+// Release stages as percentages (cumulative milestones)
+export const RELEASE_STAGES = [
+  { index: 0, name: "Initial Release", percentage: 5 },
+  { index: 1, name: "Stage 2", percentage: 15 },
+  { index: 2, name: "Stage 3", percentage: 30 },
+  { index: 3, name: "Stage 4 - Final", percentage: 50 },
 ];
 
-interface CreateStreamParams {
+interface CreateMilestoneStreamParams {
   recipientPublicKey: string;
-  totalAmountLamports: bigint;
+  amountLamports: bigint;
+  milestoneIndex: number;
+  milestoneName: string;
   tokenMint?: string;
 }
 
@@ -33,23 +29,18 @@ interface CancelParams {
 }
 
 export class StreamflowService {
-  private client: StreamflowSolana;
+  private client: InstanceType<typeof StreamflowSolana.SolanaStreamClient>;
   private senderKeypair: Keypair;
   private cluster: ICluster;
-  private connection: Connection;
 
   constructor() {
     // Load configuration from environment
     this.cluster = (process.env.SOLANA_CLUSTER as ICluster) || "devnet";
 
-    const rpcUrl = process.env.SOLANA_RPC_URL || clusterApiUrl(this.cluster);
-    this.connection = new Connection(rpcUrl, "confirmed");
+    const rpcUrl = process.env.SOLANA_RPC_URL || clusterApiUrl(this.cluster as any);
 
     // Initialize Streamflow client
-    this.client = new StreamflowSolana({
-      clusterUrl: rpcUrl,
-      cluster: this.cluster,
-    });
+    this.client = new StreamflowSolana.SolanaStreamClient(rpcUrl, this.cluster);
 
     // Load sender wallet from private key
     const privateKey = process.env.PLATFORM_WALLET_PRIVATE_KEY;
@@ -76,69 +67,81 @@ export class StreamflowService {
   }
 
   /**
-   * Create a new stream that locks funds in the Streamflow smart contract.
-   * The stream is created with all funds locked, to be released in stages.
+   * Calculate the amount for each milestone based on total donation amount.
    */
-  async createStream(params: CreateStreamParams) {
-    const { recipientPublicKey, totalAmountLamports, tokenMint } = params;
+  calculateMilestoneAmounts(totalAmountLamports: bigint) {
+    return RELEASE_STAGES.map((stage) => ({
+      index: stage.index,
+      name: stage.name,
+      percentage: stage.percentage,
+      amountLamports: (totalAmountLamports * BigInt(stage.percentage)) / 100n,
+    }));
+  }
 
-    console.log(`Creating on-chain stream:`);
+  /**
+   * Create a stream for a specific milestone.
+   * This is called when a milestone proof is verified, releasing funds for that stage.
+   * Each milestone gets its own stream that transfers immediately to the recipient.
+   */
+  async createMilestoneStream(params: CreateMilestoneStreamParams) {
+    const { recipientPublicKey, amountLamports, milestoneIndex, milestoneName, tokenMint } = params;
+
+    console.log(`Creating milestone stream:`);
+    console.log(`  Milestone: ${milestoneIndex} - ${milestoneName}`);
     console.log(`  Recipient: ${recipientPublicKey}`);
-    console.log(`  Amount: ${totalAmountLamports} lamports`);
-    console.log(`  Token: ${tokenMint}`);
-
-    // Calculate stream duration - we use a long duration since we control releases manually
-    // 1 year in seconds
-    const SECONDS_PER_YEAR = 365 * 24 * 60 * 60;
+    console.log(`  Amount: ${amountLamports} lamports (${Number(amountLamports) / 1e9} SOL)`);
+    console.log(`  Token: ${tokenMint || "Native SOL"}`);
 
     const now = Math.floor(Date.now() / 1000);
+    // Start 5 seconds in the future (minimal delay for transaction validity)
+    const startTime = now + 5;
 
+    // Convert bigint to BN for the Streamflow SDK
+    const amountBN = new BN(amountLamports.toString());
+
+    // Create a stream that releases funds immediately after start
+    // Using minimal vesting period so recipient can claim right away
     const createStreamParams: ICreateStreamData = {
-      // Sender (our platform wallet)
-      sender: this.senderKeypair,
-
       // Recipient (fundee wallet)
       recipient: recipientPublicKey,
 
       // Token mint (SOL wrapped = native SOL)
-      mint: tokenMint || "So11111111111111111111111111111111111111112",
+      tokenId: tokenMint || "So11111111111111111111111111111111111111112",
 
-      // Stream starts now
-      start: now,
+      // Stream starts shortly after creation
+      start: startTime,
 
-      // Total amount to stream (in token base units)
-      depositedAmount: getBN(totalAmountLamports, 9), // 9 decimals for SOL
+      // Total amount for this milestone
+      amount: amountBN,
 
-      // Period for unlocking (1 second = granular control)
+      // Immediate release - 1 second period with full amount
       period: 1,
+      cliff: 0,
+      cliffAmount: new BN(0),
+      amountPerPeriod: amountBN,
 
-      // Cliff - no initial cliff, we handle via withdrawals
-      cliff: now,
-      cliffAmount: getBN(0, 9),
+      // Stream name includes milestone info
+      name: `M${milestoneIndex + 1}`,
 
-      // Amount unlocked per period (full amount / duration)
-      // This makes all funds available immediately for withdrawal
-      amountPerPeriod: getBN(totalAmountLamports, 9),
-
-      // Stream name
-      name: `Charit.able-${Date.now()}`,
-
-      // Permissions
+      // Permissions - sender can cancel if needed (e.g., fraud detected)
       cancelableBySender: true,
       cancelableByRecipient: false,
       transferableBySender: false,
       transferableByRecipient: false,
 
-      // Automatic withdrawal settings
+      // No automatic withdrawal - recipient claims when ready
       canTopup: false,
       automaticWithdrawal: false,
       withdrawalFrequency: 0,
     };
 
     try {
-      const result = await this.client.create(createStreamParams);
+      const result = await this.client.create(createStreamParams, {
+        sender: this.senderKeypair,
+        isNative: !tokenMint || tokenMint === "So11111111111111111111111111111111111111112",
+      });
 
-      console.log(`Stream created on-chain!`);
+      console.log(`Milestone stream created!`);
       console.log(`  Stream ID: ${result.metadataId}`);
       console.log(`  Transaction: ${result.txId}`);
 
@@ -146,22 +149,16 @@ export class StreamflowService {
         success: true,
         streamId: result.metadataId,
         transactionSignature: result.txId,
+        milestoneIndex,
+        milestoneName,
         sender: this.senderKeypair.publicKey.toBase58(),
         recipient: recipientPublicKey,
-        totalAmount: totalAmountLamports.toString(),
+        amount: amountLamports.toString(),
         cluster: this.cluster,
-        stages: RELEASE_STAGES.map((stage) => ({
-          index: stage.index,
-          percentage: stage.percentage,
-          amountLamports: (
-            (totalAmountLamports * BigInt(stage.percentage)) /
-            100n
-          ).toString(),
-        })),
       };
     } catch (error: any) {
-      console.error("Failed to create stream on-chain:", error);
-      throw new Error(`On-chain stream creation failed: ${error.message}`);
+      console.error("Failed to create milestone stream:", error);
+      throw new Error(`Milestone stream creation failed: ${error.message}`);
     }
   }
 
@@ -177,13 +174,14 @@ export class StreamflowService {
     console.log(`  Amount: ${amount} lamports`);
 
     const withdrawParams: IWithdrawData = {
-      invoker: this.senderKeypair, // Platform initiates withdrawal on behalf of recipient
       id: streamId,
-      amount: getBN(amount, 9),
+      amount: new BN(amount.toString()),
     };
 
     try {
-      const result = await this.client.withdraw(withdrawParams);
+      const result = await this.client.withdraw(withdrawParams, {
+        invoker: this.senderKeypair,
+      });
 
       console.log(`Withdrawal successful!`);
       console.log(`  Transaction: ${result.txId}`);
@@ -209,12 +207,13 @@ export class StreamflowService {
     console.log(`Cancelling stream: ${streamId}`);
 
     const cancelParams: ICancelData = {
-      invoker: this.senderKeypair,
       id: streamId,
     };
 
     try {
-      const result = await this.client.cancel(cancelParams);
+      const result = await this.client.cancel(cancelParams, {
+        invoker: this.senderKeypair,
+      });
 
       console.log(`Stream cancelled!`);
       console.log(`  Transaction: ${result.txId}`);
@@ -248,10 +247,8 @@ export class StreamflowService {
         mint: stream.mint,
         depositedAmount: stream.depositedAmount.toString(),
         withdrawnAmount: stream.withdrawnAmount.toString(),
-        remainingAmount: (
-          stream.depositedAmount - stream.withdrawnAmount
-        ).toString(),
-        status: stream.canceledAt ? "cancelled" : stream.withdrawnAmount >= stream.depositedAmount ? "completed" : "active",
+        remainingAmount: stream.depositedAmount.sub(stream.withdrawnAmount).toString(),
+        status: stream.canceledAt ? "cancelled" : stream.withdrawnAmount.gte(stream.depositedAmount) ? "completed" : "active",
         createdAt: stream.createdAt,
         canceledAt: stream.canceledAt,
       };

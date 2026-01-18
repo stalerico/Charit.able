@@ -2,7 +2,7 @@ export const card_info = [
   { slug: "american-red-cross", title: "American Red Cross", description: "Provides emergency assistance, disaster relief, and disaster preparedness education.", imageUrl: "../../public/images/redcross_logo.jpg" },
   { slug: "united-way", title: "United Way", description: "Supports local communities through education, financial stability, and health initiatives.", imageUrl: "../../public/images/unitedway_logo.png" },
   { slug: "unicef-usa", title: "UNICEF USA", description: "Works to protect the rights and well-being of children around the world.", imageUrl: "../../public/images/unicef_logo.png" },
-  { slug: "doctors-without-borders", title: "Doctors Without Borders", description: "Delivers medical aid to people affected by conflict, epidemics, and disasters.", imageUrl: "https://via.placeholder.com/400x300?text=Doctors+Without+Borders" },
+  { slug: "doctors-without-borders", title: "Doctors Without Borders", description: "Delivers medical aid to people affected by conflict, epidemics, and disasters.", imageUrl: "../../public/images/dwob_logo.png" },
   { slug: "save-the-children", title: "Save the Children", description: "Promotes children's rights and provides aid in education, health, and emergencies.", imageUrl: "https://via.placeholder.com/400x300?text=Save+the+Children" },
   { slug: "feeding-america", title: "Feeding America", description: "Nationwide network of food banks fighting hunger in the United States.", imageUrl: "https://via.placeholder.com/400x300?text=Feeding+America" },
   { slug: "habitat-for-humanity", title: "Habitat for Humanity", description: "Builds and repairs affordable housing for families in need.", imageUrl: "https://via.placeholder.com/400x300?text=Habitat+for+Humanity" },
