@@ -2,7 +2,7 @@ import { Blog8 } from "../components/blocks/blog8"
 import "../index.css"
 
 const demoData = {
-  heading: "Donate Now",
+  heading: "Companies",
   description:
     "Discover the latest insights and tutorials about modern web development, UI design, and component-driven architecture.",
   posts: [
@@ -21,6 +21,30 @@ const demoData = {
     },
     {
       id: "post-2",
+      title: "Mastering Tailwind CSS: From Basics to Advanced Techniques",
+      summary:
+        "Discover how to leverage the full power of Tailwind CSS to create beautiful, responsive websites with clean and maintainable code.",
+      label: "Web Design",
+      author: "Michael Park",
+      published: "22 Feb 2024",
+      url: "https://shadcnblocks.com",
+      image: "https://www.shadcnblocks.com/images/block/placeholder-dark-1.svg",
+      tags: ["Web Design", "CSS"],
+    },
+    {
+      id: "post-3",
+      title: "Mastering Tailwind CSS: From Basics to Advanced Techniques",
+      summary:
+        "Discover how to leverage the full power of Tailwind CSS to create beautiful, responsive websites with clean and maintainable code.",
+      label: "Web Design",
+      author: "Michael Park",
+      published: "22 Feb 2024",
+      url: "https://shadcnblocks.com",
+      image: "https://www.shadcnblocks.com/images/block/placeholder-dark-1.svg",
+      tags: ["Web Design", "CSS"],
+    },
+    {
+      id: "post-4",
       title: "Mastering Tailwind CSS: From Basics to Advanced Techniques",
       summary:
         "Discover how to leverage the full power of Tailwind CSS to create beautiful, responsive websites with clean and maintainable code.",
