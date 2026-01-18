@@ -1,3 +1,35 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+body {
+  height: 100%;
+  overscroll-behavior: none;
+  overflow-x: hidden;
+}
+
+#root {
+  height: 100%;
+  overscroll-behavior: none;
+}
+
+body {
+  height: 100%;
+  overscroll-behavior: none;
+  overflow-x: hidden;
+}
+
+@keyframes fade {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade {
+  animation: fade 0.4s ease;
+}

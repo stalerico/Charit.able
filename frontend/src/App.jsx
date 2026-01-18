@@ -6,18 +6,24 @@ import WalletTesting from "./pages/wallet_testing.jsx";
 import Signup from "./pages/Signup.jsx";
 import CompanyDashboard from "./pages/CompanyDashboard";
 import ReceiptSliderDemo from "./pages/ReceiptSlider";
+import CharityPage from "./pages/CharityPage.jsx";
 
 function App() {
-    return (
-        <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/donate" element={<CompanyGrid />} />
-            <Route path="/wallet_testing" element={<WalletTesting />} />
-            <Route path="/signup" element={<Signup />} />
-            <Route path="/company" element={<CompanyDashboard />} />
-            <Route path="/receipt-demo" element={<ReceiptSliderDemo />} />
-        </Routes>
-    );
+  return (
+    <>
+      {/* App Routes */}
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/donate" element={<CompanyGrid />} />
+        <Route path="/wallet_testing" element={<WalletTesting />} />
+        <Route path="/signup" element={<Signup />} />
+        <Route path="/companydashboard" element={<CompanyDashboard />} />
+        <Route path="/receipt-demo" element={<ReceiptSliderDemo />} />
+        <Route path="/charity/:slug" element={<CharityPage />} />
+      </Routes>
+    </>
+  );
 }
+
 
 export default App;

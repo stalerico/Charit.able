@@ -55,17 +55,17 @@ export default function Home() {
         <div className="mt-20 w-full max-w-6xl mx-auto flex flex-col md:flex-row gap-8">
           {/* Donate Card */}
           <section className="flex-1 bg-black dark:bg-gray-200 p-6 rounded-lg shadow">
-            <h2 className="text-3xl font-bold text-gray-500 dark:text-white mb-6">
+            {/* <h2 className="text-3xl font-bold text-gray-500 dark:text-white mb-6">
               Join the cause!
-            </h2>
+            </h2> */}
             <Donate />
           </section>
 
           {/* Recent Sales / Impact Section */}
           <section className="flex-1 bg-black dark:bg-gray-900 p-6 rounded-lg shadow">
-            <h2 className="text-3xl font-bold text-gray-500 dark:text-white mb-6">
+            {/* <h2 className="text-3xl font-bold text-gray-500 dark:text-white mb-6">
               Recent Impact
-            </h2>
+            </h2> */}
             <div className="w-full">
               <RecentSales />
             </div>

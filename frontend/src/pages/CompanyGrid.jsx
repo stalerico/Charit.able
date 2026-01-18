@@ -7,7 +7,6 @@ export default function CompanyGrid() {
     <>
       <Navbar />
       <CardGrid />
-      <BlogDemo />
     </>
   );
 }
