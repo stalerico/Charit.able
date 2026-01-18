@@ -1,9 +1,4 @@
 import React from "react";
-import { loadStripeOnramp } from "@stripe/crypto";
-
-const stripeOnrampPromise = loadStripeOnramp(
-    import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY,
-);
 
 export default function WalletTesting() {
     async function startDonation() {
@@ -17,12 +12,26 @@ export default function WalletTesting() {
             }),
         });
         if (!res.ok) {
-            const err = await res.json();
-            throw new Error(err.detail || "Failed to create onramp session");
-        } else {
-            const { client_secret } = await res.json();
-            return client_secret;
+            let message = "Failed to create onramp session";
+            try {
+                const err = await res.json();
+                if (err && err.detail) {
+                    if (typeof err.detail === "string") {
+                        message = err.detail;
+                    } else if (err.detail.message) {
+                        message = err.detail.message;
+                    } else {
+                        message = JSON.stringify(err.detail);
+                    }
+                }
+            } catch (e) {
+                console.error(e);
+            }
+            throw new Error(message);
         }
+
+        const data = await res.json();
+        return data.onramp_url;
     }
 
     return (
@@ -31,20 +40,18 @@ export default function WalletTesting() {
             <button
                 onClick={async () => {
                     try {
-                        const clientSecret = await startDonation();
-                        const stripeOnramp = await stripeOnrampPromise;
-                        const onrampSession = stripeOnramp.createSession({
-                            clientSecret,
-                        });
-                        onrampSession.mount("#onramp-container");
+                        const onrampUrl = await startDonation();
+                        if (onrampUrl) {
+                            window.location.href = onrampUrl;
+                        }
                     } catch (e) {
                         console.error(e);
+                        alert(e.message || "Failed to start donation flow");
                     }
                 }}
             >
                 Donate
             </button>
-            <div id="onramp-container" style={{ minHeight: 600 }} />
         </div>
     );
 }
