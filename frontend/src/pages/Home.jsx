@@ -3,10 +3,11 @@ import TypingAnimatedText from "../components/TypingAnimatedText.tsx";
 import Navbar from "../components/navbar.tsx";
 import Donate from "../components/ui/donor_card";
 import RecentSales from "../components/RecentSales.tsx";
-import ReactBeforeSliderComponent from 'react-before-after-slider-component';
-import 'react-before-after-slider-component/dist/build.css';
-import ItemizedBarcode from "../public/images/ItemizedBarcode.jpg";
-import ReceiptOverlay from "../public/images/receipt_overlay.png";
+import ReactBeforeSliderComponent from "react-before-after-slider-component";
+import "react-before-after-slider-component/dist/build.css"; // import CSS
+import ItemizedBarcode from "../assets/images/ItemizedBarcode.jpg";
+import ReceiptOverlay from "../assets/images/ItemizedBarcodeOverlay.jpg";
+
 
 export default function Home() {
   const navigate = useNavigate();
@@ -71,10 +72,18 @@ export default function Home() {
           </section>
         </div>
 
-        <ReactBeforeSliderComponent
-          firstImage={FIRST_IMAGE}
-          secondImage={SECOND_IMAGE}
-      />
+        {/* Receipt Verif.
+        <section className="mt-16 w-full flex justify-center">
+          <div className="w-full max-w-md md:max-w-lg lg:max-w-xl pt-16">
+            <h2 className="text-2xl font-semibold mb-4">
+              AI Receipt Scanner Preview
+            </h2>
+            <ReactBeforeSliderComponent
+              firstImage={ItemizedBarcode}
+              secondImage={ReceiptOverlay}
+            />
+          </div>
+        </section> */}
 
         {/* Footer Blurb */}
         <p className="mt-24 mb-12 text-gray-500 dark:text-gray-400 max-w-2xl">

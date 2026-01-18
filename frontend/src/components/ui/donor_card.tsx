@@ -129,7 +129,7 @@ const Demo = () => {
                         alert(e.message || "Failed to start donation flow");
                     }
                 }}
-                className="mt-6 inline-block rounded-md bg-sky-500 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm transition duration-300 ease-in-out hover:bg-sky-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500">
+                className="mt-6 inline-block rounded-md bg-sky-500 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm transition duration-300 ease-in-out hover:bg-sky-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500 rounded-sm ">
                     Donate Now
                 </button>
                 <p className="mt-6 text-base leading-7 text-gray-300">

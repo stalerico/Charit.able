@@ -1,86 +1,167 @@
-import React from "react";
+import React, { useMemo, useState } from "react";
+import { card_info } from "../data/card_info";
 
-import { ButtonGroup, ButtonGroupItem } from "../components/base/button-group/button-group";
+function Card({ title, description, imageUrl, onClick }) {
+  function handleClick() {
+    if (onClick) return onClick();
+    alert(`You clicked on ${title}`);
+  }
 
-export const Default = () => (
-    <ButtonGroup selectedKeys={[]}>
-        <ButtonGroupItem id="archive">Archive</ButtonGroupItem>
-        <ButtonGroupItem id="edit">Edit</ButtonGroupItem>
-        <ButtonGroupItem id="delete">Delete</ButtonGroupItem>
-    </ButtonGroup>
-);
-
-function Card({title, description, imageUrl}) {
   return (
-    <div className="bg-white rounded-xl shadow-md overflow-hidden">
-      <div className="relative">
+    <div
+      onClick={handleClick}
+      className="
+        group relative cursor-pointer overflow-hidden rounded-2xl
+        border border-white/10 bg-white/5
+        shadow-[0_0_0_1px_rgba(255,255,255,0.06)]
+        transition-all duration-300 ease-out
+        hover:-translate-y-1 hover:border-white/20 hover:bg-white/10
+        hover:shadow-[0_12px_40px_rgba(0,0,0,0.45)]
+        focus-within:ring-2 focus-within:ring-emerald-400/40
+      "
+    >
+      {/* glow */}
+      <div
+        className="
+          pointer-events-none absolute -inset-1 opacity-0 blur-2xl
+          bg-gradient-to-r from-emerald-400/20 via-cyan-400/10 to-purple-400/20
+          transition-opacity duration-300
+          group-hover:opacity-100
+        "
+      />
+
+      {/* image */}
+      <div className="relative h-48">
         <img
-          className="w-full h-48 object-cover"
+          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
           src={imageUrl}
+          alt=""
+          loading="lazy"
         />
+        {/* dark overlay for readability */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-black/0" />
       </div>
-      <div className="p-4">
-        <div className="text-lg font-medium text-gray-800 mb-2">{title}</div>
-        <p className="text-gray-500 text-sm">
+
+      {/* content */}
+      <div className="relative p-4">
+        <div className="flex items-start justify-between gap-3">
+          <h3 className="text-base font-bold tracking-tight text-white">
+            {title}
+          </h3>
+
+          {/* little arrow hint */}
+          <div
+            className="
+              flex h-9 w-9 items-center justify-center rounded-xl
+              border border-white/10 bg-white/5 text-white/70
+              transition-all duration-300
+              group-hover:bg-white/10 group-hover:text-white
+            "
+          >
+            →
+          </div>
+        </div>
+
+        <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-white/70">
           {description}
         </p>
+
+        {/* footer row */}
+        <div className="mt-4 flex items-center justify-between text-xs text-white/50">
+          <span className="rounded-md border border-white/10 bg-black/30 px-2 py-1 backdrop-blur">
+            Donate • Track • Impact
+          </span>
+          <span className="group-hover:text-emerald-300/80 transition-colors">
+            Click to view
+          </span>
+        </div>
       </div>
     </div>
   );
 }
 
-const card_info = [
-  { title: "American Red Cross", description: "Provides emergency assistance, disaster relief, and disaster preparedness education.", imageUrl: "https://via.placeholder.com/400x300?text=American+Red+Cross" },
-  { title: "United Way", description: "Supports local communities through education, financial stability, and health initiatives.", imageUrl: "https://via.placeholder.com/400x300?text=United+Way" },
-  { title: "UNICEF USA", description: "Works to protect the rights and well-being of children around the world.", imageUrl: "https://via.placeholder.com/400x300?text=UNICEF" },
-  { title: "Doctors Without Borders", description: "Delivers medical aid to people affected by conflict, epidemics, and disasters.", imageUrl: "https://via.placeholder.com/400x300?text=Doctors+Without+Borders" },
-  { title: "Save the Children", description: "Promotes children's rights and provides aid in education, health, and emergencies.", imageUrl: "https://via.placeholder.com/400x300?text=Save+the+Children" },
-  { title: "Feeding America", description: "Nationwide network of food banks fighting hunger in the United States.", imageUrl: "https://via.placeholder.com/400x300?text=Feeding+America" },
-  { title: "Habitat for Humanity", description: "Builds and repairs affordable housing for families in need.", imageUrl: "https://via.placeholder.com/400x300?text=Habitat+for+Humanity" },
-  { title: "World Wildlife Fund", description: "Protects endangered species and conserves natural habitats.", imageUrl: "https://via.placeholder.com/400x300?text=WWF" },
-  { title: "Charity: Water", description: "Provides clean and safe drinking water to people in developing countries.", imageUrl: "https://via.placeholder.com/400x300?text=charity:water" },
-  { title: "St. Jude Children’s Research Hospital", description: "Treats and researches pediatric catastrophic diseases at no cost to families.", imageUrl: "https://via.placeholder.com/400x300?text=St.+Jude" },
-  { title: "American Cancer Society", description: "Funds cancer research and supports patients and caregivers.", imageUrl: "https://via.placeholder.com/400x300?text=American+Cancer+Society" },
-  { title: "Alzheimer’s Association", description: "Advances research and provides care and support for Alzheimer’s patients.", imageUrl: "https://via.placeholder.com/400x300?text=Alzheimer’s+Association" },
-  { title: "ASPCA", description: "Prevents cruelty to animals and supports animal rescue efforts.", imageUrl: "https://via.placeholder.com/400x300?text=ASPCA" },
-  { title: "Humane Society of the United States", description: "Protects animals through advocacy, rescue, and education.", imageUrl: "https://via.placeholder.com/400x300?text=Humane+Society" },
-  { title: "Oxfam", description: "Fights poverty and inequality through humanitarian aid and advocacy.", imageUrl: "https://via.placeholder.com/400x300?text=Oxfam" },
-  { title: "CARE", description: "Works globally to save lives and defeat poverty.", imageUrl: "https://via.placeholder.com/400x300?text=CARE" },
-  { title: "Amnesty International", description: "Campaigns for human rights and freedom worldwide.", imageUrl: "https://via.placeholder.com/400x300?text=Amnesty+International" },
-  { title: "ACLU", description: "Defends individual rights and liberties guaranteed by the Constitution.", imageUrl: "https://via.placeholder.com/400x300?text=ACLU" },
-  { title: "Human Rights Watch", description: "Investigates and reports on human rights abuses around the world.", imageUrl: "https://via.placeholder.com/400x300?text=Human+Rights+Watch" },
-  { title: "Boys & Girls Clubs of America", description: "Provides safe after-school programs for youth development.", imageUrl: "https://via.placeholder.com/400x300?text=Boys+%26+Girls+Clubs" },
-  { title: "DonorsChoose", description: "Allows donors to fund classroom projects requested by teachers.", imageUrl: "https://via.placeholder.com/400x300?text=DonorsChoose" },
-  { title: "Room to Read", description: "Improves literacy and gender equality in education worldwide.", imageUrl: "https://via.placeholder.com/400x300?text=Room+to+Read" },
-  { title: "Mental Health America", description: "Promotes mental health awareness and early intervention.", imageUrl: "https://via.placeholder.com/400x300?text=Mental+Health+America" },
-  { title: "NAMI", description: "Supports individuals and families affected by mental illness.", imageUrl: "https://via.placeholder.com/400x300?text=NAMI" },
-  { title: "Make-A-Wish Foundation", description: "Grants wishes to children with critical illnesses.", imageUrl: "https://via.placeholder.com/400x300?text=Make-A-Wish" },
-  { title: "Direct Relief", description: "Provides medical assistance to improve health and lives globally.", imageUrl: "https://via.placeholder.com/400x300?text=Direct+Relief" },
-  { title: "International Rescue Committee", description: "Helps refugees and displaced people rebuild their lives.", imageUrl: "https://via.placeholder.com/400x300?text=IRC" },
-  { title: "Water.org", description: "Expands access to safe water and sanitation through sustainable solutions.", imageUrl: "https://via.placeholder.com/400x300?text=Water.org" },
-  { title: "Heifer International", description: "Supports sustainable agriculture to end hunger and poverty.", imageUrl: "https://via.placeholder.com/400x300?text=Heifer+International" },
-  { title: "The Nature Conservancy", description: "Protects land and water for people and nature.", imageUrl: "https://via.placeholder.com/400x300?text=Nature+Conservancy" },
-  { title: "GlobalGiving", description: "Connects donors with grassroots projects around the world.", imageUrl: "https://via.placeholder.com/400x300?text=GlobalGiving" },
-  { title: "National Alliance to End Homelessness", description: "Works to prevent and end homelessness through research and policy.", imageUrl: "https://via.placeholder.com/400x300?text=End+Homelessness" },
-  { title: "World Central Kitchen", description: "Provides meals in response to humanitarian and climate crises.", imageUrl: "https://via.placeholder.com/400x300?text=World+Central+Kitchen" },
-  { title: "Kiva", description: "Enables microloans to entrepreneurs in underserved communities.", imageUrl: "https://via.placeholder.com/400x300?text=Kiva" },
-  { title: "GiveDirectly", description: "Delivers direct cash transfers to people living in extreme poverty.", imageUrl: "https://via.placeholder.com/400x300?text=GiveDirectly" }
-];
-
-
+const PAGE_SIZE = 12;
 
 const CardGrid = () => {
+  const [page, setPage] = useState(1);
+
+  const totalPages = Math.max(1, Math.ceil(card_info.length / PAGE_SIZE));
+
+  const pageCards = useMemo(() => {
+    const start = (page - 1) * PAGE_SIZE;
+    return card_info.slice(start, start + PAGE_SIZE);
+  }, [page]);
+
   return (
-    <div>
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 p-5">
-        {card_info.map((card, index) => (
-          <Card
-            key={index}
-            title={card.title}
-            description={card.description}
-            imageUrl={card.imageUrl}
-          />
-        ))}
+    <div className="min-h-screen bg-black">
+      {/* optional: subtle background grid/glow */}
+      <div className="pointer-events-none fixed inset-0 opacity-40">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(16,185,129,0.18),transparent_35%),radial-gradient(circle_at_80%_30%,rgba(34,211,238,0.12),transparent_40%),radial-gradient(circle_at_60%_80%,rgba(168,85,247,0.10),transparent_45%)]" />
+        <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.06)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.06)_1px,transparent_1px)] bg-[size:48px_48px] [mask-image:radial-gradient(circle_at_center,black,transparent_65%)]" />
+      </div>
+
+      <div className="relative mx-auto max-w-6xl p-6">
+        <div className="mb-6 flex items-end justify-between gap-4">
+          <div>
+            <h2 className="text-xl font-semibold text-white">Donation Organizations</h2>
+            <p className="mt-1 text-sm text-white/60">
+              Browse verified orgs and click a card to open details.
+            </p>
+          </div>
+
+          <div className="text-sm text-white/60">
+            Showing{" "}
+            <span className="text-white/90 font-medium">
+              {(page - 1) * PAGE_SIZE + 1}–
+              {Math.min(page * PAGE_SIZE, card_info.length)}
+            </span>{" "}
+            of{" "}
+            <span className="text-white/90 font-medium">{card_info.length}</span>
+          </div>
+        </div>
+
+        <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+          {pageCards.map((card, index) => (
+            <Card
+              key={`${card.title}-${index}`}
+              title={card.title}
+              description={card.description}
+              imageUrl={card.imageUrl}
+            />
+          ))}
+        </div>
+
+        {/* pagination */}
+        <div className="mt-8 flex items-center justify-center gap-3">
+          <button
+            onClick={() => setPage((p) => Math.max(1, p - 1))}
+            disabled={page === 1}
+            className="
+              rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm text-white/80
+              transition hover:bg-white/10 hover:text-white
+              disabled:opacity-40 disabled:hover:bg-white/5
+            "
+          >
+            Prev
+          </button>
+
+          <div className="rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm text-white/80">
+            Page <span className="font-semibold text-white">{page}</span> of{" "}
+            <span className="font-semibold text-white">{totalPages}</span>
+          </div>
+
+          <button
+            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+            disabled={page === totalPages}
+            className="
+              rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm text-white/80
+              transition hover:bg-white/10 hover:text-white
+              disabled:opacity-40 disabled:hover:bg-white/5
+            "
+          >
+            Next
+          </button>
+        </div>
       </div>
     </div>
   );
