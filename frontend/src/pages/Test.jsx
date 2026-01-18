@@ -1,7 +1,8 @@
 import { Blog8 } from "../components/blocks/blog8"
+import "../index.css"
 
 const demoData = {
-  heading: "Blog Posts",
+  heading: "Donate Now",
   description:
     "Discover the latest insights and tutorials about modern web development, UI design, and component-driven architecture.",
   posts: [
