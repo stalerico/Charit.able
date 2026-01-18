@@ -1,11 +1,13 @@
 import React, { useMemo, useState } from "react";
 import { card_info } from "../data/card_info";
+import { useNavigate } from "react-router-dom";
 
-function Card({ title, description, imageUrl, onClick }) {
-  function handleClick() {
-    if (onClick) return onClick();
-    alert(`You clicked on ${title}`);
-  }
+function Card({ slug, title, description, imageUrl }) {
+  const navigate = useNavigate();
+
+  const handleClick = () => {
+    navigate(`/charity/${slug}`);
+  };
 
   return (
     <div
@@ -71,7 +73,7 @@ function Card({ title, description, imageUrl, onClick }) {
           <span className="rounded-md border border-white/10 bg-black/30 px-2 py-1 backdrop-blur">
             Donate • Track • Impact
           </span>
-          <span className="group-hover:text-emerald-300/80 transition-colors">
+          <span className="transition-colors group-hover:text-emerald-300/80">
             Click to view
           </span>
         </div>
@@ -103,27 +105,32 @@ const CardGrid = () => {
       <div className="relative mx-auto max-w-6xl p-6">
         <div className="mb-6 flex items-end justify-between gap-4">
           <div>
-            <h2 className="text-xl font-semibold text-white">Donation Organizations</h2>
+            <h2 className="text-xl font-semibold text-white">
+              Donation Organizations
+            </h2>
             <p className="mt-1 text-sm text-white/60">
-              Browse verified orgs and click a card to open details.
+              Browse orgs and click a card to open details.
             </p>
           </div>
 
           <div className="text-sm text-white/60">
             Showing{" "}
-            <span className="text-white/90 font-medium">
+            <span className="font-medium text-white/90">
               {(page - 1) * PAGE_SIZE + 1}–
               {Math.min(page * PAGE_SIZE, card_info.length)}
             </span>{" "}
             of{" "}
-            <span className="text-white/90 font-medium">{card_info.length}</span>
+            <span className="font-medium text-white/90">
+              {card_info.length}
+            </span>
           </div>
         </div>
 
         <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
           {pageCards.map((card, index) => (
             <Card
-              key={`${card.title}-${index}`}
+              key={card.slug ?? `${card.title}-${index}`}
+              slug={card.slug}                 // ✅ pass slug
               title={card.title}
               description={card.description}
               imageUrl={card.imageUrl}
