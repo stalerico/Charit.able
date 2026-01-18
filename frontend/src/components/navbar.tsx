@@ -14,8 +14,9 @@ function NavItem({ text, onClick, classDetails }: { text: string; onClick: () =>
 function Navbar() {
   const navigate = useNavigate();
   const [navItems] = useState([
-    { text: "Donate Now", onClick: () => navigate("/donate"), classDetails: "px-4 py-2 rounded-lg text-green-400 hover:bg-white/10 transition font-extrabo" },
-    { text: "Company Dashboard", onClick: () => navigate("/company-dashboard"), classDetails: "px-4 py-2 rounded-lg text-blue-300 hover:bg-white/10 transition font-medium" },
+    { text: "Organizations", onClick: () => navigate("/donate"), classDetails: "px-4 py-2 rounded-lg text-green-400 hover:bg-green-400/10 transition font-medium" },
+    // { text: "Charities", onClick: () => navigate("/charities"), classDetails: "px-4 py-2 rounded-lg text-white hover:bg-white/10 transition font-medium" },
+    { text: "Dashboard", onClick: () => navigate("/company-dashboard"), classDetails: "px-4 py-2 rounded-lg text-cyan-300 hover:bg-cyan-400/10 transition font-medium" },
     { text: "Pricing", onClick: () => navigate("/pricing"), classDetails: "px-4 py-2 rounded-lg text-white hover:bg-white/10 transition font-medium" },
     { text: "FAQ", onClick: () => navigate("/faq"), classDetails: "px-4 py-2 rounded-lg text-white hover:bg-white/10 transition font-medium" },
   ]);

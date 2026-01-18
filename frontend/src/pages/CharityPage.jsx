@@ -2,6 +2,7 @@ import React, { useMemo } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { card_info } from "../data/card_info";
 import { charity_info } from "../data/charity_info";
+import DonorCard from "../components/ui/donor_card";
 
 export default function CharityPage() {
   const { slug } = useParams();
@@ -164,14 +165,14 @@ export default function CharityPage() {
           <section className="rounded-2xl border border-white/10 bg-white/5 p-6">
             <h2 className="text-lg font-semibold">Donate</h2>
             <p className="mt-2 text-sm text-white/60">
-              This opens your donate flow / wallet connect later.
+              Pick an amount and we will start the Coinbase onramp flow.
             </p>
 
-            <button className="mt-4 w-full rounded-xl bg-white px-4 py-2 font-semibold text-black hover:opacity-90">
-              Donate Now
-            </button>
+            <div className="mt-4">
+              <DonorCard />
+            </div>
 
-            <div className="mt-4 flex flex-wrap gap-2">
+            <div className="mt-6 flex flex-wrap gap-2">
               <Chip text="Crypto" />
               <Chip text="Escrow" />
               <Chip text="Receipts" />

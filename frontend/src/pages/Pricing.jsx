@@ -68,71 +68,64 @@ export default function Pricing() {
   return (
     <>
       <Navbar />
-      <main className="min-h-screen bg-black pt-12 pb-20">
+      <main className="min-h-screen bg-black pt-16 pb-20">
         {/* Hero Section */}
         <div className="max-w-5xl mx-auto px-4 text-center mb-16">
-          <h1 className="text-5xl font-extrabold text-white mb-4">
-            Simple, Transparent Pricing
+          <h1 className="text-6xl font-extrabold bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent mb-4">
+            Transparent Pricing for Impact
           </h1>
-          <p className="text-lg text-gray-300 max-w-2xl mx-auto">
-            Choose the plan that works for you. No hidden fees, no surprises.
-            Just transparent pricing that supports our mission to revolutionize
-            charitable giving.
+          <p className="text-lg text-gray-300 max-w-3xl mx-auto leading-relaxed">
+            No hidden fees, no surprises. Choose a plan that empowers your charitable goals.
+            Charit.able's transparent pricing supports our mission to revolutionize giving.
           </p>
         </div>
 
         {/* Pricing Cards */}
-        <div className="max-w-7xl mx-auto px-4 grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="max-w-7xl mx-auto px-4 grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
           {plans.map((plan, index) => (
             <div
               key={index}
-              className={`relative rounded-2xl border ${
+              className={`relative rounded-2xl border transition-all duration-300 p-8 hover:scale-105 ${
                 plan.recommended
-                  ? "border-blue-500/50 bg-blue-500/5"
-                  : "border-gray-700 bg-black/50"
-              } p-8 hover:border-${plan.color}-500/30 transition-all hover:transform hover:scale-105`}
+                  ? "border-green-500/50 bg-gradient-to-br from-green-500/10 to-emerald-500/5 shadow-lg shadow-green-500/20"
+                  : "border-gray-700 bg-black/50 hover:border-gray-600"
+              }`}
             >
               {/* Recommended Badge */}
               {plan.recommended && (
                 <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                  <span className="bg-blue-500 text-white px-4 py-1 rounded-full text-sm font-semibold">
-                    Most Popular
+                  <span className="bg-gradient-to-r from-green-500 to-emerald-500 text-black px-4 py-1 rounded-full text-sm font-extrabold">
+                    Most Popular ⭐
                   </span>
                 </div>
               )}
 
               {/* Plan Header */}
-              <div className="mb-6">
-                <h3 className="text-2xl font-bold text-white mb-2">
+              <div className="mb-8">
+                <h3 className="text-2xl font-extrabold text-white mb-2">
                   {plan.name}
                 </h3>
-                <p className="text-gray-400 text-sm mb-4">{plan.description}</p>
-                <div className="flex items-baseline">
-                  <span className="text-5xl font-extrabold text-white">
+                <p className="text-gray-400 text-sm mb-6 leading-relaxed">{plan.description}</p>
+                <div className="flex items-baseline gap-1">
+                  <span className="text-5xl font-extrabold text-green-400">
                     {plan.price}
                   </span>
                   {plan.period && (
-                    <span className="text-gray-400 ml-2">{plan.period}</span>
+                    <span className="text-gray-400 font-medium">{plan.period}</span>
                   )}
                 </div>
               </div>
 
               {/* Features List */}
-              <ul className="space-y-3 mb-8">
+              <ul className="space-y-4 mb-10">
                 {plan.features.map((feature, idx) => (
-                  <li key={idx} className="flex items-start">
+                  <li key={idx} className="flex items-start gap-3">
                     <svg
-                      className={`w-5 h-5 text-${plan.color}-400 mr-3 flex-shrink-0 mt-0.5`}
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
+                      className="w-5 h-5 text-green-400 flex-shrink-0 mt-0.5"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
                     >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M5 13l4 4L19 7"
-                      />
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                     </svg>
                     <span className="text-gray-300 text-sm">{feature}</span>
                   </li>
@@ -143,19 +136,17 @@ export default function Pricing() {
               <button
                 onClick={() => {
                   if (plan.name === "Individual Donor") {
-                    navigate("/signup");
+                    navigate("/donate");
                   } else if (plan.name === "Corporate") {
                     navigate("/company-dashboard");
                   } else {
                     alert("Charity application coming soon!");
                   }
                 }}
-                className={`w-full py-3 rounded-full font-semibold transition ${
+                className={`w-full py-3 rounded-full font-extrabold transition duration-300 ${
                   plan.recommended
-                    ? "bg-blue-500 text-white hover:bg-blue-600"
-                    : plan.color === "green"
-                    ? "bg-green-500 text-white hover:bg-green-600"
-                    : "bg-purple-500 text-white hover:bg-purple-600"
+                    ? "bg-green-500 text-black hover:bg-green-400 shadow-lg shadow-green-500/30"
+                    : "bg-white/10 text-white hover:bg-white/20 border border-white/20"
                 }`}
               >
                 {plan.cta}
@@ -164,117 +155,65 @@ export default function Pricing() {
           ))}
         </div>
 
-        {/* Additional Info Section */}
-        <div className="max-w-4xl mx-auto px-4 mt-20">
-          <div className="border border-gray-700 rounded-2xl bg-black/50 p-8">
-            <h2 className="text-3xl font-bold text-white mb-6 text-center">
+        {/* Features Comparison Section */}
+        <div className="max-w-6xl mx-auto px-4 mb-16">
+          <div className="border border-green-500/30 rounded-2xl bg-gradient-to-r from-green-500/5 to-emerald-500/5 p-12">
+            <h2 className="text-4xl font-extrabold text-white mb-12 text-center">
               All Plans Include
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="flex items-start">
-                <div className="bg-green-500/10 p-3 rounded-lg mr-4">
-                  <svg
-                    className="w-6 h-6 text-green-400"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
-                    />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="flex items-start gap-4">
+                <div className="bg-green-500/20 border border-green-500/30 p-3 rounded-lg flex-shrink-0">
+                  <svg className="w-6 h-6 text-green-400" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M2.393 15.283c3.565 1.75 8.256 1.75 11.822 0M7.5 4.5c0 .83.67 1.5 1.5 1.5s1.5-.67 1.5-1.5S9.83 3 9 3s-1.5.67-1.5 1.5zm6 0c0 .83.67 1.5 1.5 1.5s1.5-.67 1.5-1.5S17.83 3 17 3s-1.5.67-1.5 1.5z" />
                   </svg>
                 </div>
                 <div>
-                  <h4 className="text-white font-semibold mb-1">
-                    Blockchain Security
-                  </h4>
+                  <h4 className="text-white font-extrabold mb-2">Blockchain-Secured</h4>
                   <p className="text-gray-400 text-sm">
-                    All transactions secured with cryptographic verification
+                    All transactions cryptographically verified and immutable
                   </p>
                 </div>
               </div>
 
-              <div className="flex items-start">
-                <div className="bg-blue-500/10 p-3 rounded-lg mr-4">
-                  <svg
-                    className="w-6 h-6 text-blue-400"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                    />
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-                    />
+              <div className="flex items-start gap-4">
+                <div className="bg-green-500/20 border border-green-500/30 p-3 rounded-lg flex-shrink-0">
+                  <svg className="w-6 h-6 text-green-400" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v1h8v-1zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z" clipRule="evenodd" />
                   </svg>
                 </div>
                 <div>
-                  <h4 className="text-white font-semibold mb-1">
-                    Full Transparency
-                  </h4>
+                  <h4 className="text-white font-extrabold mb-2">Full Transparency</h4>
                   <p className="text-gray-400 text-sm">
-                    Track every donation from source to impact
+                    Track every donation from source to charitable impact
                   </p>
                 </div>
               </div>
 
-              <div className="flex items-start">
-                <div className="bg-purple-500/10 p-3 rounded-lg mr-4">
-                  <svg
-                    className="w-6 h-6 text-purple-400"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z"
-                    />
+              <div className="flex items-start gap-4">
+                <div className="bg-green-500/20 border border-green-500/30 p-3 rounded-lg flex-shrink-0">
+                  <svg className="w-6 h-6 text-green-400" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z" />
                   </svg>
                 </div>
                 <div>
-                  <h4 className="text-white font-semibold mb-1">24/7 Support</h4>
+                  <h4 className="text-white font-extrabold mb-2">Real-Time Analytics</h4>
                   <p className="text-gray-400 text-sm">
-                    Our team is always here to help you succeed
+                    Live dashboards showing donation impact and metrics
                   </p>
                 </div>
               </div>
 
-              <div className="flex items-start">
-                <div className="bg-green-500/10 p-3 rounded-lg mr-4">
-                  <svg
-                    className="w-6 h-6 text-green-400"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M13 10V3L4 14h7v7l9-11h-7z"
-                    />
+              <div className="flex items-start gap-4">
+                <div className="bg-green-500/20 border border-green-500/30 p-3 rounded-lg flex-shrink-0">
+                  <svg className="w-6 h-6 text-green-400" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M5 2a1 1 0 011 1v1h1V3a1 1 0 011-1h5a1 1 0 011 1v1h1V3a1 1 0 011 1v1h1.5A1.5 1.5 0 0118 5.5v12a1.5 1.5 0 01-1.5 1.5H3.5A1.5 1.5 0 012 17.5v-12A1.5 1.5 0 013.5 4H5V3a1 1 0 011-1zm6.5 6a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zm2 1a3 3 0 11-6 0 3 3 0 016 0z" clipRule="evenodd" />
                   </svg>
                 </div>
                 <div>
-                  <h4 className="text-white font-semibold mb-1">
-                    Instant Processing
-                  </h4>
+                  <h4 className="text-white font-extrabold mb-2">Instant Processing</h4>
                   <p className="text-gray-400 text-sm">
-                    Fast, reliable transaction processing powered by blockchain
+                    Lightning-fast transactions powered by blockchain
                   </p>
                 </div>
               </div>
@@ -282,24 +221,23 @@ export default function Pricing() {
           </div>
         </div>
 
-        {/* FAQ Callout */}
-        <div className="max-w-3xl mx-auto px-4 mt-16 text-center">
-          <h3 className="text-2xl font-bold text-white mb-4">
-            Questions about pricing?
+        {/* Help Section */}
+        <div className="max-w-3xl mx-auto px-4 text-center">
+          <h3 className="text-3xl font-extrabold text-white mb-4">
+            Have Questions?
           </h3>
-          <p className="text-gray-300 mb-6">
-            Check out our FAQ for detailed information or contact our team for
-            custom enterprise solutions.
+          <p className="text-gray-300 mb-8">
+            Explore our comprehensive FAQ or reach out to our team for custom enterprise solutions.
           </p>
-          <div className="flex gap-4 justify-center">
+          <div className="flex gap-4 justify-center flex-wrap">
             <button
               onClick={() => navigate("/faq")}
-              className="px-6 py-3 rounded-full bg-white/10 text-white font-medium hover:bg-white/20 transition"
+              className="px-8 py-3 rounded-full bg-white/10 text-white font-extrabold hover:bg-white/20 border border-white/20 transition"
             >
               View FAQ
             </button>
-            <button className="px-6 py-3 rounded-full bg-green-500 text-white font-medium hover:bg-green-600 transition">
-              Contact Sales
+            <button className="px-8 py-3 rounded-full bg-green-500 text-black font-extrabold hover:bg-green-400 transition shadow-lg shadow-green-500/30">
+              Contact Us
             </button>
           </div>
         </div>

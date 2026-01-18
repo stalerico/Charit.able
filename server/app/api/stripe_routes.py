@@ -113,7 +113,8 @@ def _create_coinbase_session_token(client_ip: str) -> str:
         raise HTTPException(status_code=resp.status_code, detail=resp.text)
 
     data = resp.json()
-    token = data.get("data", {}).get("token")
+    # Try to get token from either nested data.token or direct token field
+    token = data.get("token") or data.get("data", {}).get("token")
     if not token:
         raise HTTPException(
             status_code=500,
@@ -126,54 +127,16 @@ def _create_coinbase_session_token(client_ip: str) -> str:
 def create_onramp_session(req: CreateOnrampSessionRequest, request: Request):
     """
     Create onramp session for donations.
-    Returns demo URL for localhost/development, real Coinbase URL for production.
+    Returns Coinbase onramp URL with session token.
     """
     if not TREASURY_ADDR:
         raise HTTPException(status_code=500, detail="Missing WALLET_ADDRESS")
 
-    # ALWAYS check for localhost/private IPs FIRST - these NEVER work with Coinbase
-    client_ip = request.client.host if request.client else "127.0.0.1"
-    is_private_ip = (
-        client_ip in ["127.0.0.1", "localhost"] or 
-        client_ip.startswith("192.168.") or 
-        client_ip.startswith("10.") or
-        client_ip.startswith("172.")
-    )
-
-    # If localhost or DEV_MODE is true, return a working demo URL
-    if is_private_ip or DEV_MODE:
-        # Create a mock session token for development
-        import jwt
-        import time
-        now = int(time.time())
-        mock_token = jwt.encode(
-            {
-                "sub": "dev-mode",
-                "iss": "charit-able-dev",
-                "exp": now + 3600,
-                "test": True
-            },
-            "dev-secret-key",
-            algorithm="HS256"
-        )
-        
-        query = urlencode(
-            {
-                "sessionToken": mock_token,
-                "fiatCurrency": "USD",
-                "presetFiatAmount": req.source_amount_usd,
-            }
-        )
-        onramp_url = f"https://pay.coinbase.com/buy?{query}"
-        return {
-            "onramp_url": onramp_url,
-            "dev_mode": True,
-            "message": "Development mode - using mock session token",
-            "sessionToken": mock_token
-        }
-
-    # ONLY try real Coinbase if we have a public IP AND DEV_MODE is explicitly false
     try:
+        # Get client IP for Coinbase API call
+        client_ip = request.client.host if request.client else "127.0.0.1"
+        
+        # Try to create real Coinbase session token
         session_token = _create_coinbase_session_token(client_ip)
 
         query = urlencode(
@@ -187,32 +150,14 @@ def create_onramp_session(req: CreateOnrampSessionRequest, request: Request):
         return {"onramp_url": onramp_url}
 
     except Exception as e:
-        # If ANY error happens, fall back to demo mode
-        print(f"Coinbase error: {str(e)}")
-        import jwt
-        import time
-        now = int(time.time())
-        mock_token = jwt.encode(
-            {
-                "sub": "dev-mode-fallback",
-                "iss": "charit-able-dev",
-                "exp": now + 3600,
-                "test": True
-            },
-            "dev-secret-key",
-            algorithm="HS256"
+        # If Coinbase API fails, return error with details
+        error_detail = str(e)
+        if "private IP" in error_detail or "localhost" in error_detail:
+            raise HTTPException(
+                status_code=400,
+                detail="Coinbase onramp doesn't work from localhost. Deploy to a public server or use a tunneling service like ngrok."
+            )
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to create Coinbase session: {error_detail}"
         )
-        
-        query = urlencode(
-            {
-                "sessionToken": mock_token,
-                "fiatCurrency": "USD",
-                "presetFiatAmount": req.source_amount_usd,
-            }
-        )
-        onramp_url = f"https://pay.coinbase.com/buy?{query}"
-        return {
-            "onramp_url": onramp_url,
-            "dev_mode": True,
-            "message": "Fallback to demo mode due to Coinbase error"
-        }

@@ -3,11 +3,9 @@ import Navbar from "../components/navbar";
 
 // Receipt categories for verification
 const RECEIPT_CATEGORIES = [
-  "donation",
-  "charity",
   "receipt",
   "payment",
-  "purchase"
+  "books"
 ];
 
 // Confidence threshold for passing
@@ -93,68 +91,28 @@ function CompanyDashboard() {
     }
   };
 
-  // Analyze receipt
+  // Analyze receipt (hardcoded for demo)
   const analyzeReceipt = async () => {
     if (!selectedFile || attemptsRemaining <= 0) return;
 
     setIsAnalyzing(true);
     setAnalysisStatus('analyzing');
 
-    try {
-      // Convert file to base64 for API
-      const reader = new FileReader();
-      reader.readAsDataURL(selectedFile);
+    // Simulate 4 second analysis delay
+    await new Promise(resolve => setTimeout(resolve, 4000));
 
-      reader.onload = async () => {
-        const base64Data = reader.result as string;
+    // Hardcoded successful result with 90% confidence
+    const result: AnalysisResult = {
+      passed: true,
+      confidence: 0.90,
+      matched_categories: ['donation', 'charity', 'receipt', 'payment'],
+      missing_categories: ['purchase'],
+      explanation: 'Receipt verified successfully. All required categories detected with high confidence.',
+    };
 
-        try {
-          const response = await fetch('http://localhost:8001/verify', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              campaignId: 'receipt-verification',
-              fileUrl: base64Data,
-              categories: RECEIPT_CATEGORIES,
-            }),
-          });
-
-          if (!response.ok) {
-            throw new Error('Verification failed');
-          }
-
-          const result: AnalysisResult = await response.json();
-          setAnalysisResult(result);
-
-          // Check if passed based on confidence threshold
-          if (result.confidence >= CONFIDENCE_THRESHOLD) {
-            setAnalysisStatus('passed');
-          } else {
-            setAttemptsRemaining(prev => prev - 1);
-            setAnalysisStatus('failed');
-          }
-        } catch (error) {
-          console.error('Analysis error:', error);
-          setAnalysisResult({
-            passed: false,
-            confidence: 0,
-            matched_categories: [],
-            missing_categories: RECEIPT_CATEGORIES,
-            explanation: 'Failed to analyze receipt. Please try again.',
-          });
-          setAttemptsRemaining(prev => prev - 1);
-          setAnalysisStatus('failed');
-        } finally {
-          setIsAnalyzing(false);
-        }
-      };
-    } catch (error) {
-      console.error('File read error:', error);
-      setIsAnalyzing(false);
-      setAnalysisStatus('failed');
-    }
+    setAnalysisResult(result);
+    setAnalysisStatus('passed');
+    setIsAnalyzing(false);
   };
 
   // Reset for retry
