@@ -18,7 +18,7 @@ const Demo = () => {
     mouseY.set(clientY - top);
   }
 
-  const background = useMotionTemplate`radial-gradient(650px circle at ${mouseX}px ${mouseY}px, rgba(14, 165, 233, 0.15), transparent 80%)`;
+  const background = useMotionTemplate`radial-gradient(650px circle at ${mouseX}px ${mouseY}px, rgba(10, 186, 83, 0.55), transparent 80%)`;
 
   return (
     <div

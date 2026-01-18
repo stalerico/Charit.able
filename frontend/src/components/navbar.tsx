@@ -49,8 +49,6 @@ function Navbar() {
               <NavItem key={index} text={item.text} onClick={item.onClick} classDetails={item.classDetails} />
             ))}
           </nav>
-
-
         </div>
       </div>
 
