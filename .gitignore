@@ -3,4 +3,7 @@ node_modules
 __pycache__/
 *.pyc
 .venv/
+server/.venv/
+venv/
+env/
 
